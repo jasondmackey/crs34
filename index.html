@@ -61,8 +61,11 @@
         .chat-actions button { padding: 4px 8px; background: #ffc107; color: #333; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .chat-actions button:hover { background: #ffd54f; }
         .chat-messages { height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; background: #f8f9fa; }
-        .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+        .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; cursor: pointer; position: relative; }
         .chat-message:hover { background: #e9ecef; }
+        .chat-message::after { content: 'Click to edit'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #999; opacity: 0; transition: opacity 0.2s; }
+        .chat-message:hover::after { opacity: 1; }
+        .chat-message.editing { background: #fff3cd; }
         .chat-message .time { color: #764ba2; font-size: 11px; margin-right: 8px; }
         .chat-message .user { font-weight: bold; color: #667eea; }
         .chat-name-input { margin-bottom: 8px; }
@@ -283,7 +286,28 @@
     const chatName = document.getElementById('chatName');
     const chatClear = document.getElementById('chatClear');
     const CHAT_KEY = 'crs34_chat_messages';
+    const USERS_KEY = 'crs34_registered_users';
+    const MY_NAME_KEY = 'crs34_my_name';
     let editingId = null;
+
+    // Load registered users
+    function getRegisteredUsers() {
+        const saved = localStorage.getItem(USERS_KEY);
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    // Register a user name
+    function registerUser(name) {
+        const users = getRegisteredUsers();
+        if (!users.includes(name)) {
+            users.push(name);
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            localStorage.setItem(MY_NAME_KEY, name);
+            chatName.value = name;
+            chatName.disabled = true;
+        }
+        return users.includes(name);
+    }
 
     // Load saved messages
     function loadChatMessages() {
@@ -292,6 +316,12 @@
             chatMessages.innerHTML = saved;
             chatMessages.scrollTop = chatMessages.scrollHeight;
             addEditHandlers();
+        }
+        // Load my saved name
+        const myName = localStorage.getItem(MY_NAME_KEY);
+        if (myName) {
+            chatName.value = myName;
+            chatName.disabled = true;
         }
     }
 
@@ -302,15 +332,24 @@
 
     // Save new message
     function saveMessage(text, name) {
+        // Register user on first message
+        if (!chatName.disabled) {
+            if (!registerUser(name)) {
+                alert(`Username @${name.substring(1)} is already taken. Please choose another.`);
+                return false;
+            }
+        }
+        
         const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         const messageId = 'msg-' + Date.now();
         const nameHtml = name ? `<span class="user">${escapeHtml(name)}</span>` : '';
-        const messageHtml = `<div class="chat-message" data-id="${messageId}"><span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(text)}</div>`;
+        const messageHtml = `<div class="chat-message" data-id="${messageId}" data-user="${escapeHtml(name)}"><span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(text)}</div>`;
         chatMessages.innerHTML += messageHtml;
         saveAllMessages();
         chatMessages.scrollTop = chatMessages.scrollHeight;
         chatInput.value = '';
         addEditHandlers();
+        return true;
     }
 
     // Simple HTML escape
@@ -320,21 +359,32 @@
         return div.innerHTML;
     }
 
+    // Get current user's registered name
+    function getMyName() {
+        return localStorage.getItem(MY_NAME_KEY) || chatName.value;
+    }
+
     // Add edit click handlers to all messages
     function addEditHandlers() {
         document.querySelectorAll('.chat-message').forEach(msg => {
             msg.onclick = function() {
                 const msgId = this.dataset.id;
-                const text = this.textContent.replace(/^\[.*?\]\s*(@\w+\s*)?/, '').trim();
-                const userMatch = this.textContent.match(/@(\w+)/);
-                const name = userMatch ? userMatch[0] : '';
+                const msgUser = this.dataset.user;
+                const myName = getMyName();
+                const text = this.textContent.replace(/^\[.*?\]\s*<span class="user">.*?<\/span>\s*/, '').trim();
+                
+                // Check if this is my message
+                if (msgUser !== myName) {
+                    alert('You can only edit your own messages.');
+                    return;
+                }
                 
                 // If already editing this message, save it
                 if (editingId === msgId) {
                     const newText = chatInput.value;
                     if (newText.trim()) {
                         const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                        const nameHtml = name ? `<span class="user">${escapeHtml(name)}</span>` : '';
+                        const nameHtml = myName ? `<span class="user">${escapeHtml(myName)}</span>` : '';
                         this.innerHTML = `<span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(newText)}`;
                         this.classList.remove('editing');
                         saveAllMessages();
@@ -343,6 +393,7 @@
                     }
                     editingId = null;
                     chatSend.textContent = 'Send';
+                    checkCanSend();
                     return;
                 }
                 
@@ -351,7 +402,7 @@
                 document.querySelectorAll('.chat-message').forEach(m => m.classList.remove('editing'));
                 this.classList.add('editing');
                 chatInput.value = text;
-                chatInput.placeholder = `Editing: ${name || 'message'}`;
+                chatInput.placeholder = `Editing your message...`;
                 chatInput.focus();
                 chatSend.textContent = 'Save';
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -390,7 +441,10 @@
                 // Save edit
                 document.querySelector(`[data-id="${editingId}"]`)?.click();
             } else {
-                saveMessage(chatInput.value, chatName.value);
+                const success = saveMessage(chatInput.value, chatName.value);
+                if (success) {
+                    chatInput.value = '';
+                }
             }
         }
         // Escape to cancel edit
@@ -411,7 +465,10 @@
                 // Save edit
                 document.querySelector(`[data-id="${editingId}"]`)?.click();
             } else {
-                saveMessage(chatInput.value, chatName.value);
+                const success = saveMessage(chatInput.value, chatName.value);
+                if (success) {
+                    chatInput.value = '';
+                }
             }
         }
     });
