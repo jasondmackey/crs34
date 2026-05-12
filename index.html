@@ -215,7 +215,8 @@
 </div>
 
 <script>
-    let streamEmbedded = false;
+    // Embed NASA YouTube live stream immediately on page load
+    document.getElementById('streamContent').outerHTML = '<div class="stream-embed"><iframe src="https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
 
     function updateCountdown() {
         const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
@@ -237,13 +238,8 @@
             document.getElementById('missionStatus').style.background = '#764ba2';
         }
 
-        // Embed YouTube stream at T-60 minutes (or if already past launch)
-        const streamContent = document.getElementById('streamContent');
-        if (!streamEmbedded && diff <= 3600000) {
-            streamEmbedded = true;
-            // NASA YouTube channel live embed (auto-redirects to active live stream)
-            streamContent.outerHTML = '<div class="stream-embed"><iframe src="https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ&autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
-        }
+        // Update stream status badge based on time to launch
+        // (embed is always shown — NASA channel streams ISS feed and pre-launch coverage)
 
         // Update stream status badge
         const streamStatus = document.getElementById('streamStatus');
