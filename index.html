@@ -215,9 +215,9 @@
 </div>
 
 <script>
-    // Embed NASA YouTube live stream immediately on page load
+    // Embed NASA YouTube live stream
     // NASA live stream video ID (current as of launch day — update if NASA switches streams)
-    document.getElementById('streamContent').outerHTML = '<div class="stream-embed"><iframe src="https://www.youtube.com/embed/FuuC4dpSQ1M?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
+    document.getElementById('streamContent').outerHTML = '<div class="stream-embed"><iframe src="https://www.youtube.com/embed/FuuC4dpSQ1M?vq=highres" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
 
     function updateCountdown() {
         const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
