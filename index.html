@@ -35,8 +35,12 @@
         .stream-status { display: block; background: #ffc107; color: #333; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-align: center; }
         .stream-status.live { background: #dc3545; color: white; }
         .stream-content { display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; border-radius: 10px; min-height: 200px; margin-bottom: 15px; text-align: center; padding: 20px; }
-        .stream-embed { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; margin-bottom: 15px; background: #000; }
+        .stream-embed { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; background: #000; }
         .stream-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .feed-selector { display: flex; gap: 8px; margin-bottom: 12px; }
+        .feed-btn { flex: 1; padding: 8px 12px; border: none; border-radius: 8px; background: #667eea; color: white; font-size: 13px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .feed-btn:hover { background: #764ba2; }
+        .feed-btn.active { background: #28a745; }
         .stream-icon { font-size: 48px; margin-bottom: 10px; }
         .stream-message { font-size: 14px; color: #666; margin-bottom: 15px; line-height: 1.6; }
         .stream-button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; transition: background 0.3s; }
@@ -155,11 +159,13 @@
     <div class="right-column">
         <div class="panel">
             <div class="panel-header">📺 Live Launch Feed</div>
+            <div class="feed-selector">
+                <button class="feed-btn active" data-feed="nasa">NASA YouTube</button>
+                <button class="feed-btn" data-feed="spacex">SpaceX Webcast</button>
+            </div>
             <div class="stream-status" id="streamStatus">⚪ Stream goes live at T-60 minutes</div>
-            <div class="stream-content" id="streamContent">
-                <div class="stream-icon">📡</div>
-                <div class="stream-message">Live coverage begins approximately<br><strong>60 minutes before launch (6:16 PM EDT)</strong></div>
-                <a href="https://www.youtube.com/c/NASA/live" target="_blank" class="stream-button">Watch on NASA YouTube Live</a>
+            <div class="stream-embed" id="streamEmbed">
+                <iframe src="https://www.youtube.com/embed/FuuC4dpSQ1M?vq=highres" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
             <div style="font-size:12px;color:#666;padding:10px;background:#f8f9fa;border-radius:8px;line-height:1.8">
                 <strong style="color:#333;display:block;margin-bottom:6px">📌 Coverage includes:</strong>
@@ -215,9 +221,26 @@
 </div>
 
 <script>
-    // Embed NASA YouTube live stream
-    // NASA live stream video ID (current as of launch day — update if NASA switches streams)
-    document.getElementById('streamContent').outerHTML = '<div class="stream-embed"><iframe src="https://www.youtube.com/embed/FuuC4dpSQ1M?vq=highres" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
+    // Feed selection and switching
+    const feeds = {
+        nasa: 'https://www.youtube.com/embed/FuuC4dpSQ1M?vq=highres',
+        spacex: 'https://www.youtube.com/embed/1RI6cSIHZQs?vq=highres'
+    };
+
+    // Initialize feed buttons
+    document.querySelectorAll('.feed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.feed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const feed = btn.dataset.feed;
+            const iframe = document.querySelector('#streamEmbed iframe');
+            iframe.src = feeds[feed];
+            // Update stream status
+            const status = document.getElementById('streamStatus');
+            status.textContent = feed === 'nasa' ? '🔴 NASA Live Stream' : '🚀 SpaceX Webcast';
+            status.className = 'stream-status live';
+        });
+    });
 
     function updateCountdown() {
         const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
