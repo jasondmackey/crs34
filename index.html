@@ -50,6 +50,15 @@
         .feed-button.red { background: #dc3545; }
         .weather-card { background: #f8f9fa; border-radius: 8px; padding: 10px; margin: 8px 0; border-left: 3px solid #ffc107; font-size: 12px; color: #555; line-height: 1.8; }
         .go-prob { font-size: 22px; font-weight: bold; color: #dc3545; }
+        .featured-payload { display: flex; align-items: center; gap: 16px; background: #f8f9fa; border-radius: 10px; padding: 16px; margin-top: 20px; border-left: 4px solid #ffc107; }
+        .featured-payload img { width: 90px; height: 90px; object-fit: contain; flex-shrink: 0; border-radius: 6px; }
+        .featured-payload-text { flex: 1; }
+        .featured-payload-label { font-size: 11px; font-weight: bold; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .featured-payload-name { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 4px; }
+        .featured-payload-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 8px; }
+        .featured-payload-link { display: inline-block; background: #667eea; color: white; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; transition: background 0.3s; }
+        .featured-payload-link:hover { background: #764ba2; }
+        @media (max-width: 600px) { .featured-payload img { width: 70px; height: 70px; } }
         @media (max-width: 1100px) { .main-wrapper { grid-template-columns: 1fr; } }
         @media (max-width: 600px) {
             body { padding: 12px; }
@@ -99,6 +108,18 @@
                 >Planet formation investigation</li>
             </ul>
         </div>
+        <div class="featured-payload">
+            <a href="https://science.nasa.gov/mission/clarreo-pathfinder/" target="_blank">
+                <img src="clarreo-patch.jpg" alt="CLARREO Pathfinder mission patch">
+            </a>
+            <div class="featured-payload-text">
+                <div class="featured-payload-label">Featured Payload</div>
+                <div class="featured-payload-name">CLARREO Pathfinder</div>
+                <div class="featured-payload-desc">ISS-based instrument calibrating Earth observation satellites using the Sun and Moon as references — advancing climate measurement accuracy.</div>
+                <a href="https://science.nasa.gov/mission/clarreo-pathfinder/" target="_blank" class="featured-payload-link">NASA Mission Page →</a>
+            </div>
+        </div>
+
         <div class="status-section">
             <div class="status-title">📡 Launch Resources</div>
             <a href="https://www.youtube.com/c/NASA/live" target="_blank" class="resource-link primary">🎥 NASA Live Stream</a>
