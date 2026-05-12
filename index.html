@@ -178,6 +178,27 @@
             <a href="https://x.com/SpaceX" target="_blank" class="resource-link">@SpaceX</a>
             <a href="https://x.com/NASA" target="_blank" class="resource-link">@NASA</a>
         </div>
+
+        <div class="panel chat-panel">
+            <div class="chat-header">
+                <span class="chat-header-title">💬 Launch Chat</span>
+                <div class="chat-actions">
+                    <button id="chatClear">Clear</button>
+                </div>
+            </div>
+            <div class="chat-instructions">
+                Enter <strong>@yourname</strong> then type and Send. To edit: click ✏️, modify text, then click Save or press Enter.
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-name-input">
+                <input type="text" id="chatName" placeholder="@yourname">
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message..." maxlength="500">
+                <button id="chatSend" disabled>Send</button>
+            </div>
+        </div>
+
         <div class="footer">
             <p>Last updated: <span id="updateTime">--:-- --</span> | Data from NASA &amp; SpaceX</p>
         </div>
@@ -245,26 +266,6 @@
                 <div class="feed-label">📰 Spaceflight Now</div>
                 <div class="feed-content">Independent mission tracking with detailed countdown milestones and status updates.</div>
                 <a href="https://spaceflightnow.com/" target="_blank" class="feed-button">Spaceflight Now</a>
-            </div>
-        </div>
-
-        <div class="panel chat-panel">
-            <div class="chat-header">
-                <span class="chat-header-title">💬 Launch Chat</span>
-                <div class="chat-actions">
-                    <button id="chatClear">Clear</button>
-                </div>
-            </div>
-            <div class="chat-instructions">
-                Enter <strong>@yourname</strong> then type and Send. Click your messages to edit.
-            </div>
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-name-input">
-                <input type="text" id="chatName" placeholder="@yourname">
-            </div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Type your message..." maxlength="500">
-                <button id="chatSend" disabled>Send</button>
             </div>
         </div>
     </div>
