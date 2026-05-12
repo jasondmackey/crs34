@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceX CRS-34 Launch Countdown</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .main-wrapper { max-width: 1400px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+        .container { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; color: #333; margin-bottom: 10px; }
+        .mission-info { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .launch-time { font-size: 16px; color: #764ba2; font-weight: bold; }
+        .countdown { display: grid; grid-template-columns: repeat(4,1fr); gap: 15px; margin: 30px 0; }
+        .countdown-unit { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); border-radius: 10px; padding: 20px; text-align: center; color: white; }
+        .countdown-number { font-size: 36px; font-weight: bold; line-height: 1; }
+        .countdown-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; opacity: 0.9; }
+        .status-section { background: #f8f9fa; border-radius: 10px; padding: 20px; margin-top: 20px; border-left: 4px solid #667eea; }
+        .status-title { font-size: 14px; font-weight: bold; color: #333; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .launch-status { display: inline-block; background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+        .updates-list { list-style: none; font-size: 13px; color: #666; margin-top: 10px; }
+        .updates-list li { padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+        .updates-list li:last-child { border-bottom: none; }
+        .update-time { color: #764ba2; font-weight: bold; }
+        .resource-link { display: inline-block; background: #667eea; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold; margin: 5px 5px 5px 0; transition: background 0.3s; }
+        .resource-link:hover { background: #764ba2; }
+        .resource-link.primary { background: #28a745; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #999; }
+        .right-column { display: flex; flex-direction: column; gap: 20px; }
+        .panel { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .panel-header { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; text-align: center; }
+        .stream-status { display: block; background: #ffc107; color: #333; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-align: center; }
+        .stream-status.live { background: #dc3545; color: white; }
+        .stream-content { display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; border-radius: 10px; min-height: 200px; margin-bottom: 15px; text-align: center; padding: 20px; }
+        .stream-icon { font-size: 48px; margin-bottom: 10px; }
+        .stream-message { font-size: 14px; color: #666; margin-bottom: 15px; line-height: 1.6; }
+        .stream-button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; transition: background 0.3s; }
+        .stream-button:hover { background: #764ba2; }
+        .feed-section { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; }
+        .feed-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .feed-label { font-size: 12px; font-weight: bold; color: #764ba2; text-transform: uppercase; margin-bottom: 6px; }
+        .feed-content { font-size: 13px; color: #666; line-height: 1.5; }
+        .feed-button { display: inline-block; background: #667eea; color: white; padding: 7px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; margin-top: 7px; transition: background 0.3s; }
+        .feed-button:hover { background: #764ba2; }
+        .feed-button.red { background: #dc3545; }
+        .weather-card { background: #f8f9fa; border-radius: 8px; padding: 10px; margin: 8px 0; border-left: 3px solid #ffc107; font-size: 12px; color: #555; line-height: 1.8; }
+        .go-prob { font-size: 22px; font-weight: bold; color: #dc3545; }
+        @media (max-width: 1100px) { .main-wrapper { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="main-wrapper">
+    <div class="container">
+        <div class="header">
+            <h1>🚀 SpaceX CRS-34</h1>
+            <div class="mission-info">ISS Cargo Resupply Mission — Falcon 9</div>
+            <div class="launch-time">Launch: May 12, 2026 at 7:16 PM EDT (2316 UTC)</div>
+        </div>
+        <div class="countdown">
+            <div class="countdown-unit"><div class="countdown-number" id="days">00</div><div class="countdown-label">Days</div></div>
+            <div class="countdown-unit"><div class="countdown-number" id="hours">00</div><div class="countdown-label">Hours</div></div>
+            <div class="countdown-unit"><div class="countdown-number" id="minutes">00</div><div class="countdown-label">Minutes</div></div>
+            <div class="countdown-unit"><div class="countdown-number" id="seconds">00</div><div class="countdown-label">Seconds</div></div>
+        </div>
+        <div class="status-section">
+            <div class="status-title">Mission Status</div>
+            <span class="launch-status" id="missionStatus">T-MINUS COUNTDOWN</span>
+            <ul class="updates-list" style="margin-top:10px">
+                ><span class="update-time">7:16 PM EDT</span> — Primary launch window (May 12)</li>
+                ><span class="update-time">6:50 PM EDT</span> — Backup window (May 13)</li>
+                ><span class="update-time">9:50 AM EDT</span> — ISS docking at Harmony (May 14)</li>
+            </ul>
+        </div>
+        <div class="status-section">
+            <div class="status-title">Payload Highlights</div>
+            <ul class="updates-list">
+                >~6,500 lbs cargo and crew supplies</li>
+                >6th flight for this Dragon capsule (record)</li>
+                >Bone scaffold experiment — osteoporosis research</li>
+                >Charged particle instrument — space weather</li>
+                >Planet formation investigation</li>
+            </ul>
+        </div>
+        <div class="status-section">
+            <div class="status-title">📡 Launch Resources</div>
+            <a href="https://www.youtube.com/c/NASA/live" target="_blank" class="resource-link primary">🎥 NASA Live Stream</a>
+            <a href="https://www.spacex.com/launches/crs-34" target="_blank" class="resource-link">SpaceX Mission</a>
+            <a href="https://www.nasa.gov/news-release/nasa-sets-coverage-for-spacex-34th-station-resupply-launch-arrival/" target="_blank" class="resource-link">NASA Coverage</a>
+            <a href="https://spaceflightnow.com/" target="_blank" class="resource-link">Spaceflight Now</a>
+            <a href="https://x.com/SpaceX" target="_blank" class="resource-link">@SpaceX</a>
+            <a href="https://x.com/NASA" target="_blank" class="resource-link">@NASA</a>
+        </div>
+        <div class="footer">
+            <p>Last updated: <span id="updateTime">--:-- --</span> | Data from NASA &amp; SpaceX</p>
+        </div>
+    </div>
+
+    <div class="right-column">
+        <div class="panel">
+            <div class="panel-header">📺 Live Launch Feed</div>
+            <div class="stream-status" id="streamStatus">⚪ Stream goes live at T-60 minutes</div>
+            <div class="stream-content" id="streamContent">
+                <div class="stream-icon">📡</div>
+                <div class="stream-message">Live coverage begins approximately<br><strong>60 minutes before launch (6:16 PM EDT)</strong></div>
+                <a href="https://www.youtube.com/c/NASA/live" target="_blank" class="stream-button">Watch on NASA YouTube Live</a>
+            </div>
+            <div style="font-size:12px;color:#666;padding:10px;background:#f8f9fa;border-radius:8px;line-height:1.8">
+                <strong style="color:#333;display:block;margin-bottom:6px">📌 Coverage includes:</strong>
+                ✓ Real-time telemetry &amp; countdown<br>
+                ✓ Pre-launch mission briefings<br>
+                ✓ Booster landing &amp; recovery<br>
+                ✓ Post-launch analysis
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">⚡ Live Update Feeds</div>
+
+            <div class="feed-section">
+                <div class="feed-label">⛅ Weather / Go Probability</div>
+                <div class="feed-content">
+                    <div class="go-prob">35% GO</div>
+                    <div class="weather-card">
+                        🌡 Temperature: 76°F &nbsp;|&nbsp; 💨 Winds: 9 mph<br>
+                        ☁️ Cloud Cover: 89% &nbsp;|&nbsp; 🌧 Rain: 1.65 in<br>
+                        ⚠️ Concerns: Cumulus, Anvil &amp; Electric Field Rules<br>
+                        📍 45th Weather Squadron — CCAFS
+                    </div>
+                    <a href="https://www.spacelaunchschedule.com/" target="_blank" class="feed-button">Space Launch Schedule</a>
+                </div>
+            </div>
+
+            <div class="feed-section">
+                <div class="feed-label">🐦 SpaceX on X (Twitter)</div>
+                <div class="feed-content">Real-time go/no-go decisions, webcast links, and mission milestones posted live.</div>
+                <a href="https://x.com/SpaceX" target="_blank" class="feed-button red">Follow @SpaceX Live</a>
+            </div>
+
+            <div class="feed-section">
+                <div class="feed-label">🔴 NASA Live &amp; Social</div>
+                <div class="feed-content">Official NASA coverage starts 7:00 PM EDT on YouTube, NASA+, and NASA.gov/live.</div>
+                <a href="https://www.nasa.gov/live" target="_blank" class="feed-button red">NASA Live</a>
+                <a href="https://x.com/NASA" target="_blank" class="feed-button" style="margin-left:5px">@NASA</a>
+            </div>
+
+            <div class="feed-section">
+                <div class="feed-label">🚀 r/SpaceX Community Thread</div>
+                <div class="feed-content">Live discussion thread with weather updates, expert commentary, and go/no-go monitoring.</div>
+                <a href="https://www.reddit.com/r/spacex/" target="_blank" class="feed-button">Open r/SpaceX</a>
+            </div>
+
+            <div class="feed-section">
+                <div class="feed-label">📰 Spaceflight Now</div>
+                <div class="feed-content">Independent mission tracking with detailed countdown milestones and status updates.</div>
+                <a href="https://spaceflightnow.com/" target="_blank" class="feed-button">Spaceflight Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateCountdown() {
+        const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
+        const now = new Date().getTime();
+        const diff = launchDate - now;
+
+        if (diff > 0) {
+            document.getElementById('days').textContent = String(Math.floor(diff / 86400000)).padStart(2,'0');
