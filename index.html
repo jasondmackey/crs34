@@ -63,6 +63,9 @@
         .chat-actions button:hover { background: #ffd54f; }
         .resource-link.slack-link { background: #4a154b; }
         .resource-link.slack-link:hover { background: #6b246c; }
+        .qr-container { display: inline-block; text-align: center; }
+        .qr-container img { background: white; padding: 4px; border-radius: 8px; border: 2px solid #333; }
+        .qr-label { font-size: 10px; color: #666; margin-top: 4px; }
         .chat-messages { height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; background: #f8f9fa; }
         .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; }
         .chat-message.editing { background: #fff3cd; }
@@ -116,6 +119,12 @@
 <div class="main-wrapper">
     <div class="container">
         <div class="header">
+            <div style="text-align:right;margin-bottom:10px;">
+                <div class="qr-container">
+                    <img id="qrCode" src="" alt="QR Code" style="width:80px;height:80px;">
+                    <div class="qr-label">Scan to open on phone</div>
+                </div>
+            </div>
             <div class="header-patches">
                 <div style="text-align:center">
                     <img src="crs34-patch.png" alt="SpaceX CRS-34 mission patch">
@@ -516,6 +525,14 @@
 
     // Load messages on startup
     loadChatMessages();
+
+    // Generate QR code for current page
+    const qrCode = document.getElementById('qrCode');
+    if (qrCode) {
+        const currentUrl = window.location.href;
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}&bgcolor=FFFFFF&color=000000&margin=4`;
+        qrCode.src = qrApiUrl;
+    }
 
     // Make all links without target open in new tab by default
     document.querySelectorAll('a:not([target])').forEach(link => {
