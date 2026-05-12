@@ -53,6 +53,17 @@
         .feed-button:hover { background: #764ba2; }
         .feed-button.red { background: #dc3545; }
         .weather-card { background: #f8f9fa; border-radius: 8px; padding: 10px; margin: 8px 0; border-left: 3px solid #ffc107; font-size: 12px; color: #555; line-height: 1.8; }
+        /* Chat panel styles */
+        .chat-panel { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .chat-header { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; text-align: center; }
+        .chat-messages { height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; background: #f8f9fa; }
+        .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; }
+        .chat-message .time { color: #764ba2; font-size: 11px; margin-right: 8px; }
+        .chat-input { display: flex; gap: 8px; }
+        .chat-input input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; }
+        .chat-input button { padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .chat-input button:hover { background: #764ba2; }
+        .chat-input button:disabled { background: #ccc; cursor: not-allowed; }
         .go-prob { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 4px; }
         .wx-live-badge { display: inline-block; background: #28a745; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-left: 6px; vertical-align: middle; }
         .header-patches { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
@@ -221,6 +232,15 @@
                 <a href="https://spaceflightnow.com/" target="_blank" class="feed-button">Spaceflight Now</a>
             </div>
         </div>
+
+        <div class="panel chat-panel">
+            <div class="chat-header">💬 Launch Chat</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message..." maxlength="500">
+                <button id="chatSend" disabled>Send</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -235,6 +255,63 @@
             document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     });
+
+    // Local Chat functionality
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+    const CHAT_KEY = 'crs34_chat_messages';
+
+    // Load saved messages
+    function loadChatMessages() {
+        const saved = localStorage.getItem(CHAT_KEY);
+        if (saved) {
+            chatMessages.innerHTML = saved;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }
+
+    // Save message
+    function saveMessage(text) {
+        const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const messageHtml = `<div class="chat-message"><span class="time">[${timestamp}]</span>${escapeHtml(text)}</div>`;
+        chatMessages.innerHTML += messageHtml;
+        localStorage.setItem(CHAT_KEY, chatMessages.innerHTML);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatInput.value = '';
+    }
+
+    // Simple HTML escape
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Enable/disable send button based on input
+    chatInput.addEventListener('input', () => {
+        chatSend.disabled = !chatInput.value.trim();
+    });
+
+    // Send on Enter key
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && chatInput.value.trim()) {
+            saveMessage(chatInput.value);
+            chatSend.disabled = true;
+        }
+    });
+
+    // Send button click
+    chatSend.addEventListener('click', () => {
+        if (chatInput.value.trim()) {
+            saveMessage(chatInput.value);
+            chatSend.disabled = true;
+        }
+    });
+
+    // Clear chat button (optional - could add to UI later)
+    // For now, just load messages on startup
+    loadChatMessages();
 
     function updateCountdown() {
         const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
