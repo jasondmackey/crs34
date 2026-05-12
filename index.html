@@ -61,9 +61,11 @@
         .chat-actions { display: flex; gap: 8px; align-items: center; }
         .chat-actions button { padding: 6px 10px; background: #ffc107; color: #333; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .chat-actions button:hover { background: #ffd54f; }
+        .slack-container { display: inline-block; }
         .slack-link { padding: 4px; background: #4a154b; border-radius: 8px; text-decoration: none; display: inline-block; }
         .slack-link:hover { background: #6b246c; }
-        .slack-link img { display: block; }
+        .slack-link img { display: block; width: 96px; height: auto; }
+        .slack-desc { font-size: 10px; color: #666; text-align: center; margin-top: 2px; }
         .chat-messages { height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; background: #f8f9fa; }
         .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; }
         .chat-message.editing { background: #fff3cd; }
@@ -186,9 +188,12 @@
             <div class="chat-header">
                 <span class="chat-header-title">💬 Launch Chat</span>
                 <div class="chat-actions">
-                    <a href="https://lasp-cu.enterprise.slack.com/archives/CVCNQQHT2" target="_blank" class="slack-link" title="LASP Slack">
-                        <img src="https://lasp.colorado.edu/wp-content/uploads/2021/02/cu-lasp.reverse.svg" alt="LASP Slack" style="height:96px;width:96px;">
-                    </a>
+                    <div class="slack-container">
+                        <a href="https://lasp-cu.enterprise.slack.com/archives/CVCNQQHT2" target="_blank" class="slack-link" title="LASP Slack">
+                            <img src="https://lasp.colorado.edu/wp-content/uploads/2021/02/cu-lasp.reverse.svg" alt="LASP Slack">
+                        </a>
+                        <div class="slack-desc">LASP Slack Channel</div>
+                    </div>
                     <button id="chatClear">Clear</button>
                 </div>
             </div>
