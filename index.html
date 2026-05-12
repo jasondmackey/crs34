@@ -55,15 +55,24 @@
         .weather-card { background: #f8f9fa; border-radius: 8px; padding: 10px; margin: 8px 0; border-left: 3px solid #ffc107; font-size: 12px; color: #555; line-height: 1.8; }
         /* Chat panel styles */
         .chat-panel { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .chat-header { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; text-align: center; }
+        .chat-header { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header-title { flex: 1; }
+        .chat-actions { display: flex; gap: 6px; }
+        .chat-actions button { padding: 4px 8px; background: #ffc107; color: #333; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .chat-actions button:hover { background: #ffd54f; }
         .chat-messages { height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; background: #f8f9fa; }
-        .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; }
+        .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+        .chat-message:hover { background: #e9ecef; }
         .chat-message .time { color: #764ba2; font-size: 11px; margin-right: 8px; }
+        .chat-message .user { font-weight: bold; color: #667eea; }
+        .chat-name-input { margin-bottom: 8px; }
+        .chat-name-input input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box; }
         .chat-input { display: flex; gap: 8px; }
         .chat-input input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; }
         .chat-input button { padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .chat-input button:hover { background: #764ba2; }
         .chat-input button:disabled { background: #ccc; cursor: not-allowed; }
+        .editing { background: #fff3cd !important; }
         .go-prob { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 4px; }
         .wx-live-badge { display: inline-block; background: #28a745; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-left: 6px; vertical-align: middle; }
         .header-patches { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
@@ -92,6 +101,9 @@
             .status-section { padding: 14px; }
             .stream-icon { font-size: 36px; }
             .stream-embed { padding-bottom: 56.25%; margin-bottom: 12px; }
+            .chat-panel { max-height: 40vh; }
+            .chat-messages { height: 150px; }
+            .chat-name-input { margin-bottom: 8px; }
         }
     </style>
 </head>
@@ -234,8 +246,16 @@
         </div>
 
         <div class="panel chat-panel">
-            <div class="chat-header">💬 Launch Chat</div>
+            <div class="chat-header">
+                <span class="chat-header-title">💬 Launch Chat</span>
+                <div class="chat-actions">
+                    <button id="chatClear">Clear</button>
+                </div>
+            </div>
             <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-name-input">
+                <input type="text" id="chatName" placeholder="@yourname">
+            </div>
             <div class="chat-input">
                 <input type="text" id="chatInput" placeholder="Type your message..." maxlength="500">
                 <button id="chatSend" disabled>Send</button>
@@ -260,7 +280,10 @@
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
+    const chatName = document.getElementById('chatName');
+    const chatClear = document.getElementById('chatClear');
     const CHAT_KEY = 'crs34_chat_messages';
+    let editingId = null;
 
     // Load saved messages
     function loadChatMessages() {
@@ -268,17 +291,26 @@
         if (saved) {
             chatMessages.innerHTML = saved;
             chatMessages.scrollTop = chatMessages.scrollHeight;
+            addEditHandlers();
         }
     }
 
-    // Save message
-    function saveMessage(text) {
-        const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const messageHtml = `<div class="chat-message"><span class="time">[${timestamp}]</span>${escapeHtml(text)}</div>`;
-        chatMessages.innerHTML += messageHtml;
+    // Save all messages
+    function saveAllMessages() {
         localStorage.setItem(CHAT_KEY, chatMessages.innerHTML);
+    }
+
+    // Save new message
+    function saveMessage(text, name) {
+        const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const messageId = 'msg-' + Date.now();
+        const nameHtml = name ? `<span class="user">${escapeHtml(name)}</span>` : '';
+        const messageHtml = `<div class="chat-message" data-id="${messageId}"><span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(text)}</div>`;
+        chatMessages.innerHTML += messageHtml;
+        saveAllMessages();
         chatMessages.scrollTop = chatMessages.scrollHeight;
         chatInput.value = '';
+        addEditHandlers();
     }
 
     // Simple HTML escape
@@ -288,29 +320,103 @@
         return div.innerHTML;
     }
 
+    // Add edit click handlers to all messages
+    function addEditHandlers() {
+        document.querySelectorAll('.chat-message').forEach(msg => {
+            msg.onclick = function() {
+                const msgId = this.dataset.id;
+                const text = this.textContent.replace(/^\[.*?\]\s*(@\w+\s*)?/, '').trim();
+                const userMatch = this.textContent.match(/@(\w+)/);
+                const name = userMatch ? userMatch[0] : '';
+                
+                // If already editing this message, save it
+                if (editingId === msgId) {
+                    const newText = chatInput.value;
+                    if (newText.trim()) {
+                        const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                        const nameHtml = name ? `<span class="user">${escapeHtml(name)}</span>` : '';
+                        this.innerHTML = `<span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(newText)}`;
+                        this.classList.remove('editing');
+                        saveAllMessages();
+                        chatInput.value = '';
+                        chatInput.placeholder = 'Type your message...';
+                    }
+                    editingId = null;
+                    chatSend.textContent = 'Send';
+                    return;
+                }
+                
+                // Start editing this message
+                editingId = msgId;
+                document.querySelectorAll('.chat-message').forEach(m => m.classList.remove('editing'));
+                this.classList.add('editing');
+                chatInput.value = text;
+                chatInput.placeholder = `Editing: ${name || 'message'}`;
+                chatInput.focus();
+                chatSend.textContent = 'Save';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+        });
+    }
+
+    // Validate name format (@yourname)
+    function validateName(name) {
+        return name && name.startsWith('@') && name.length > 1 && /^[@\w]+$/.test(name);
+    }
+
+    // Check if we can send (name is valid and message is not empty)
+    function checkCanSend() {
+        const canSend = validateName(chatName.value) && chatInput.value.trim();
+        chatSend.disabled = !canSend;
+        return canSend;
+    }
+
     // Enable/disable send button based on input
-    chatInput.addEventListener('input', () => {
-        chatSend.disabled = !chatInput.value.trim();
+    chatName.addEventListener('input', checkCanSend);
+    chatInput.addEventListener('input', checkCanSend);
+
+    // Clear chat
+    chatClear.addEventListener('click', () => {
+        if (confirm('Clear all chat messages?')) {
+            chatMessages.innerHTML = '';
+            localStorage.removeItem(CHAT_KEY);
+        }
     });
 
     // Send on Enter key
     chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && chatInput.value.trim()) {
-            saveMessage(chatInput.value);
-            chatSend.disabled = true;
+        if (e.key === 'Enter' && checkCanSend()) {
+            if (editingId) {
+                // Save edit
+                document.querySelector(`[data-id="${editingId}"]`)?.click();
+            } else {
+                saveMessage(chatInput.value, chatName.value);
+            }
+        }
+        // Escape to cancel edit
+        if (e.key === 'Escape' && editingId) {
+            editingId = null;
+            document.querySelectorAll('.chat-message').forEach(m => m.classList.remove('editing'));
+            chatInput.value = '';
+            chatInput.placeholder = 'Type your message...';
+            chatSend.textContent = 'Send';
+            checkCanSend();
         }
     });
 
     // Send button click
     chatSend.addEventListener('click', () => {
-        if (chatInput.value.trim()) {
-            saveMessage(chatInput.value);
-            chatSend.disabled = true;
+        if (checkCanSend()) {
+            if (editingId) {
+                // Save edit
+                document.querySelector(`[data-id="${editingId}"]`)?.click();
+            } else {
+                saveMessage(chatInput.value, chatName.value);
+            }
         }
     });
 
-    // Clear chat button (optional - could add to UI later)
-    // For now, just load messages on startup
+    // Load messages on startup
     loadChatMessages();
 
     function updateCountdown() {
