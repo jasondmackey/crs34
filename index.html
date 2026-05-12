@@ -157,7 +157,7 @@
                 <div style="flex:1">
                     <h1 style="font-size:28px">SpaceX CRS-34</h1>
                     <div class="mission-info" style="margin:6px 0">ISS Cargo Resupply Mission — Falcon 9</div>
-                    <div class="launch-time">May 12, 2026 · 7:16 PM EDT</div>
+                    <div class="launch-time">May 13, 2026 · 6:50 PM EDT</div>
                 </div>
                 <div style="text-align:center">
                     <a href="https://science.nasa.gov/mission/clarreo-pathfinder/" target="_blank">
@@ -177,8 +177,7 @@
             <div class="status-title">Mission Status</div>
             <span class="launch-status" id="missionStatus">T-MINUS COUNTDOWN</span>
             <ul class="updates-list" style="margin-top:10px">
-                ><span class="update-time">7:16 PM EDT</span> — Primary launch window (May 12)</li>
-                ><span class="update-time">6:50 PM EDT</span> — Backup window (May 13)</li>
+                ><span class="update-time">6:50 PM EDT</span> — Launch window (May 13)</li>
                 ><span class="update-time">9:50 AM EDT</span> — ISS docking at Harmony (May 14)</li>
             </ul>
             <div class="weather-card" style="margin-top:10px;">
@@ -262,7 +261,7 @@
                 <button class="feed-btn active" data-feed="nasa">NASA Feed</button>
                 <button class="feed-btn" data-feed="spacex">SpaceX Feed</button>
             </div>
-            <div class="stream-status" id="streamStatus">⚪ Stream goes live at T-60 minutes</div>
+            <div class="stream-status" id="streamStatus">⚪ Stream goes live at T-60 minutes (5:50 PM EDT)</div>
             <div class="stream-embed" id="streamEmbed">
                 <iframe src="https://www.youtube.com/embed/FuuC4dpSQ1M?vq=highres" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
@@ -590,7 +589,7 @@
     });
 
     function updateCountdown() {
-        const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
+        const launchDate = new Date('2026-05-13T22:50:00Z').getTime();
         const now = new Date().getTime();
         const diff = launchDate - now;
 
