@@ -55,17 +55,17 @@
         .weather-card { background: #f8f9fa; border-radius: 8px; padding: 10px; margin: 8px 0; border-left: 3px solid #ffc107; font-size: 12px; color: #555; line-height: 1.8; }
         /* Chat panel styles */
         .chat-panel { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .chat-header { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
         .chat-header-title { flex: 1; }
+        .chat-instructions { font-size: 12px; color: #666; margin-bottom: 12px; text-align: center; padding: 8px; background: #e3f2fd; border-radius: 8px; }
         .chat-actions { display: flex; gap: 6px; }
         .chat-actions button { padding: 4px 8px; background: #ffc107; color: #333; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .chat-actions button:hover { background: #ffd54f; }
         .chat-messages { height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; background: #f8f9fa; }
-        .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; cursor: pointer; position: relative; }
-        .chat-message:hover { background: #e9ecef; }
-        .chat-message::after { content: 'Click to edit'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #999; opacity: 0; transition: opacity 0.2s; }
-        .chat-message:hover::after { opacity: 1; }
+        .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; }
         .chat-message.editing { background: #fff3cd; }
+        .edit-btn { background: none; border: none; color: #764ba2; cursor: pointer; padding: 2px 4px; font-size: 14px; margin-left: 8px; opacity: 0.6; }
+        .edit-btn:hover { opacity: 1; }
         .chat-message .time { color: #764ba2; font-size: 11px; margin-right: 8px; }
         .chat-message .user { font-weight: bold; color: #667eea; }
         .chat-name-input { margin-bottom: 8px; }
@@ -255,6 +255,9 @@
                     <button id="chatClear">Clear</button>
                 </div>
             </div>
+            <div class="chat-instructions">
+                Enter <strong>@yourname</strong> then type and Send. Click your messages to edit.
+            </div>
             <div class="chat-messages" id="chatMessages"></div>
             <div class="chat-name-input">
                 <input type="text" id="chatName" placeholder="@yourname">
@@ -342,8 +345,11 @@
         
         const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         const messageId = 'msg-' + Date.now();
+        const myName = getMyName();
+        const canEdit = (name === myName);
+        const editBtn = canEdit ? `<button class="edit-btn" data-id="${messageId}" title="Edit">✏️</button>` : '';
         const nameHtml = name ? `<span class="user">${escapeHtml(name)}</span>` : '';
-        const messageHtml = `<div class="chat-message" data-id="${messageId}" data-user="${escapeHtml(name)}"><span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(text)}</div>`;
+        const messageHtml = `<div class="chat-message" data-id="${messageId}" data-user="${escapeHtml(name)}"><span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(text)}${editBtn}</div>`;
         chatMessages.innerHTML += messageHtml;
         saveAllMessages();
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -366,18 +372,15 @@
 
     // Add edit click handlers to all messages
     function addEditHandlers() {
-        document.querySelectorAll('.chat-message').forEach(msg => {
-            msg.onclick = function() {
+        // Handle edit button clicks
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.onclick = function(e) {
+                e.stopPropagation();
                 const msgId = this.dataset.id;
-                const msgUser = this.dataset.user;
+                const msg = this.closest('.chat-message');
+                const msgUser = msg.dataset.user;
                 const myName = getMyName();
-                const text = this.textContent.replace(/^\[.*?\]\s*<span class="user">.*?<\/span>\s*/, '').trim();
-                
-                // Check if this is my message
-                if (msgUser !== myName) {
-                    alert('You can only edit your own messages.');
-                    return;
-                }
+                const text = msg.textContent.replace(/^\[.*?\][^:]*:?/, '').replace(/✏️$/, '').trim();
                 
                 // If already editing this message, save it
                 if (editingId === msgId) {
@@ -385,11 +388,13 @@
                     if (newText.trim()) {
                         const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                         const nameHtml = myName ? `<span class="user">${escapeHtml(myName)}</span>` : '';
-                        this.innerHTML = `<span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(newText)}`;
-                        this.classList.remove('editing');
+                        const editBtn = `<button class="edit-btn" data-id="${msgId}" title="Edit">✏️</button>`;
+                        msg.innerHTML = `<span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(newText)}${editBtn}`;
+                        msg.classList.remove('editing');
                         saveAllMessages();
                         chatInput.value = '';
                         chatInput.placeholder = 'Type your message...';
+                        addEditHandlers();
                     }
                     editingId = null;
                     chatSend.textContent = 'Send';
@@ -400,7 +405,7 @@
                 // Start editing this message
                 editingId = msgId;
                 document.querySelectorAll('.chat-message').forEach(m => m.classList.remove('editing'));
-                this.classList.add('editing');
+                msg.classList.add('editing');
                 chatInput.value = text;
                 chatInput.placeholder = `Editing your message...`;
                 chatInput.focus();
