@@ -440,21 +440,35 @@
         }
     });
 
-    // Send on Enter key
-    chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && checkCanSend()) {
-            if (editingId) {
-                // Save edit
-                document.querySelector(`[data-id="${editingId}"]`)?.click();
-            } else {
-                const success = saveMessage(chatInput.value, chatName.value);
-                if (success) {
-                    chatInput.value = '';
-                }
-            }
+    // Save current edit
+    function saveCurrentEdit() {
+        if (!editingId) return false;
+        const msg = document.querySelector(`[data-id="${editingId}"]`);
+        if (!msg) return false;
+        
+        const myName = getMyName();
+        const newText = chatInput.value.trim();
+        if (newText) {
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const nameHtml = myName ? `<span class="user">${escapeHtml(myName)}</span>` : '';
+            const editBtn = `<button class="edit-btn" data-id="${editingId}" title="Edit">✏️</button>`;
+            msg.innerHTML = `<span class="time">[${timestamp}]</span>${nameHtml} ${escapeHtml(newText)}${editBtn}`;
+            msg.classList.remove('editing');
+            saveAllMessages();
+            chatInput.value = '';
+            chatInput.placeholder = 'Type your message...';
+            editingId = null;
+            chatSend.textContent = 'Send';
+            checkCanSend();
+            addEditHandlers();
+            return true;
         }
-        // Escape to cancel edit
-        if (e.key === 'Escape' && editingId) {
+        return false;
+    }
+
+    // Cancel current edit
+    function cancelEdit() {
+        if (editingId) {
             editingId = null;
             document.querySelectorAll('.chat-message').forEach(m => m.classList.remove('editing'));
             chatInput.value = '';
@@ -462,19 +476,34 @@
             chatSend.textContent = 'Send';
             checkCanSend();
         }
-    });
+    }
 
-    // Send button click
-    chatSend.addEventListener('click', () => {
-        if (checkCanSend()) {
+    // Send on Enter key
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
             if (editingId) {
-                // Save edit
-                document.querySelector(`[data-id="${editingId}"]`)?.click();
-            } else {
+                saveCurrentEdit();
+            } else if (checkCanSend()) {
                 const success = saveMessage(chatInput.value, chatName.value);
                 if (success) {
                     chatInput.value = '';
                 }
+            }
+        }
+        // Escape to cancel edit
+        if (e.key === 'Escape') {
+            cancelEdit();
+        }
+    });
+
+    // Send button click
+    chatSend.addEventListener('click', () => {
+        if (editingId) {
+            saveCurrentEdit();
+        } else if (checkCanSend()) {
+            const success = saveMessage(chatInput.value, chatName.value);
+            if (success) {
+                chatInput.value = '';
             }
         }
     });
