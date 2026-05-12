@@ -511,6 +511,14 @@
     // Load messages on startup
     loadChatMessages();
 
+    // Make all links without target open in new tab by default
+    document.querySelectorAll('a:not([target])').forEach(link => {
+        const href = link.getAttribute('href');
+        // Skip empty or anchor links
+        if (!href || href === '' || href === '#' || href.startsWith('#')) return;
+        link.setAttribute('target', '_blank');
+    });
+
     function updateCountdown() {
         const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
         const now = new Date().getTime();
