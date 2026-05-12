@@ -35,6 +35,8 @@
         .stream-status { display: block; background: #ffc107; color: #333; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-align: center; }
         .stream-status.live { background: #dc3545; color: white; }
         .stream-content { display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; border-radius: 10px; min-height: 200px; margin-bottom: 15px; text-align: center; padding: 20px; }
+        .stream-embed { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 10px; overflow: hidden; margin-bottom: 15px; background: #000; }
+        .stream-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         .stream-icon { font-size: 48px; margin-bottom: 10px; }
         .stream-message { font-size: 14px; color: #666; margin-bottom: 15px; line-height: 1.6; }
         .stream-button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; transition: background 0.3s; }
@@ -162,6 +164,8 @@
 </div>
 
 <script>
+    let streamEmbedded = false;
+
     function updateCountdown() {
         const launchDate = new Date('2026-05-12T23:16:00Z').getTime();
         const now = new Date().getTime();
@@ -182,7 +186,15 @@
             document.getElementById('missionStatus').style.background = '#764ba2';
         }
 
-        // Update stream status based on time to launch
+        // Embed YouTube stream at T-60 minutes (or if already past launch)
+        const streamContent = document.getElementById('streamContent');
+        if (!streamEmbedded && diff <= 3600000) {
+            streamEmbedded = true;
+            // NASA YouTube channel live embed (auto-redirects to active live stream)
+            streamContent.outerHTML = '<div class="stream-embed"><iframe src="https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ&autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
+        }
+
+        // Update stream status badge
         const streamStatus = document.getElementById('streamStatus');
         if (diff > 0 && diff <= 3600000) {
             streamStatus.textContent = '🔴 LIVE — Stream is active!';
