@@ -66,6 +66,26 @@
         .qr-container { display: inline-block; text-align: center; }
         .qr-container img { background: white; padding: 4px; border-radius: 8px; border: 2px solid #333; }
         .qr-label { font-size: 10px; color: #666; margin-top: 4px; }
+        /* Navigation sidebar */
+        .nav-sidebar { position: fixed; left: 0; top: 0; z-index: 1000; height: 100%; width: 200px; max-width: 80vw; background: rgba(255,255,255,0.95); box-shadow: 2px 0 10px rgba(0,0,0,0.2); transform: translateX(-100%); transition: transform 0.3s ease; }
+        .nav-sidebar.open { transform: translateX(0); }
+        .sidebar-content { padding: 20px 10px; }
+        .sidebar-header { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; text-align: center; }
+        .sidebar-link { display: block; padding: 8px 10px; color: #333; text-decoration: none; border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
+        .sidebar-link:hover { background: #f0f0f0; }
+        .sidebar-toggle { position: absolute; top: 10px; right: -40px; background: #667eea; color: white; border: none; border-radius: 0 6px 6px 0; padding: 10px 12px; cursor: pointer; font-size: 16px; z-index: 1001; }
+        .sidebar-toggle:hover { background: #764ba2; }
+        .main-wrapper { margin-left: 0; transition: margin-left 0.3s ease; }
+        .main-wrapper.sidebar-open { margin-left: 200px; }
+        @media (max-width: 1100px) {
+            .nav-sidebar { width: 250px; }
+            .main-wrapper.sidebar-open { margin-left: 250px; }
+        }
+        @media (max-width: 600px) {
+            .nav-sidebar { width: 70vw; max-width: 250px; }
+            .sidebar-toggle { right: -35px; padding: 8px 10px; font-size: 14px; }
+            .main-wrapper.sidebar-open { margin-left: 70vw; }
+        }
         .chat-messages { height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; background: #f8f9fa; }
         .chat-message { margin-bottom: 8px; font-size: 13px; color: #333; line-height: 1.4; padding: 6px 8px; border-radius: 6px; }
         .chat-message.editing { background: #fff3cd; }
@@ -114,15 +134,21 @@
     </style>
 </head>
 <body>
+<div class="nav-sidebar" id="navSidebar">
+    <div class="sidebar-content">
+        <div class="sidebar-header">🚀 CRS-34 Navigation</div>
+        <a href="#missionStatus" class="sidebar-link">Mission Status</a>
+        <a href="#payload" class="sidebar-link">Payload Highlights</a>
+        <a href="#resources" class="sidebar-link">Launch Resources</a>
+        <a href="#liveFeed" class="sidebar-link">Live Launch Feed</a>
+        <a href="#updates" class="sidebar-link">Live Update Feeds</a>
+        <a href="#chatMessages" class="sidebar-link">Launch Chat</a>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Navigation">☰</button>
+</div>
 <div class="main-wrapper">
     <div class="container">
         <div class="header">
-            <div style="text-align:right;margin-bottom:10px;">
-                <div class="qr-container">
-                    <img id="qrCode" src="" alt="QR Code" style="width:80px;height:80px;">
-                    <div class="qr-label">Scan to open on phone</div>
-                </div>
-            </div>
             <div class="header-patches">
                 <div style="text-align:center">
                     <img src="crs34-patch.png" alt="SpaceX CRS-34 mission patch">
@@ -163,7 +189,7 @@
                 📍 KSC / CCAFS · Updated <span id="wx-updated">--:--</span>
             </div>
         </div>
-        <div class="status-section">
+        <div class="status-section" id="payload">
             <div class="status-title">Payload Highlights</div>
             <ul class="updates-list">
                 >~6,500 lbs cargo and crew supplies</li>
@@ -185,7 +211,7 @@
             </div>
         </div>
 
-        <div class="status-section">
+        <div class="status-section" id="resources">
             <div class="status-title">📡 Launch Resources</div>
             <a href="https://www.youtube.com/c/NASA/live" target="_blank" class="resource-link primary">🎥 NASA Live Stream</a>
             <a href="https://www.spacex.com/launches/crs-34" target="_blank" class="resource-link">SpaceX Mission</a>
@@ -219,13 +245,18 @@
             </div>
         </div>
 
+        <div class="qr-container" style="text-align:center;margin:15px 0;">
+            <img id="qrCode" src="" alt="QR Code" style="width:80px;height:80px;">
+            <div class="qr-label">Scan to open on phone</div>
+        </div>
+
         <div class="footer">
             <p>Last updated: <span id="updateTime">--:-- --</span> | Data from NASA &amp; SpaceX</p>
         </div>
     </div>
 
     <div class="right-column">
-        <div class="panel">
+        <div class="panel" id="liveFeed">
             <div class="panel-header">📺 Live Launch Feed</div>
             <div class="feed-selector">
                 <button class="feed-btn active" data-feed="nasa">NASA Feed</button>
@@ -247,7 +278,7 @@
             </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="updates">
             <div class="panel-header">⚡ Live Update Feeds</div>
 
             <div class="feed-section">
@@ -530,6 +561,17 @@
         const currentUrl = window.location.href;
         const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}&bgcolor=FFFFFF&color=000000&margin=4`;
         qrCode.src = qrApiUrl;
+    }
+
+    // Sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const navSidebar = document.getElementById('navSidebar');
+    const mainWrapper = document.querySelector('.main-wrapper');
+    if (sidebarToggle && navSidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            navSidebar.classList.toggle('open');
+            mainWrapper.classList.toggle('sidebar-open');
+        });
     }
 
     // Make all links without target open in new tab by default
