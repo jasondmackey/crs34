@@ -25,17 +25,26 @@
         
         .status-section { background: #f8f9fa; border-radius: 10px; padding: 20px; margin-top: 20px; border-left: 4px solid #667eea; }
         
-        /* Unified Section Headings */
-        .status-title, .panel-header, .section-heading, .payload-subtitle { 
-            font-size: 11px; font-weight: bold; color: #888; text-transform: uppercase; 
-            letter-spacing: 2px; margin-bottom: 12px; text-align: left;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Level 1: Major Section/Panel Titles */
+        .status-title, .panel-header { 
+            font-size: 14px; font-weight: bold; color: #333; text-transform: uppercase; 
+            letter-spacing: 1.5px; margin-bottom: 15px; display: block;
         }
-        .panel-header { text-align: center; margin-bottom: 15px; } /* Panel headers stay centered */
-        
+        .panel-header { text-align: center; }
+
+        /* Level 2: Sub-labels / Category Markers */
+        .payload-subtitle, .section-heading, .featured-payload-label { 
+            font-size: 10px; font-weight: bold; color: #888; text-transform: uppercase; 
+            letter-spacing: 2px; margin-bottom: 10px; display: block;
+        }
         .section-heading { margin: 20px 0 8px 0; }
+
+        /* Level 3: Specific Content Titles / Item Names */
+        .section-title, .featured-payload-name { 
+            font-size: 16px; font-weight: bold; color: #333; margin: 0 0 8px 0; display: block;
+        }
+
         .section-subheading { font-size: 13px; font-weight: bold; color: #764ba2; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 0; }
-        .section-title { font-size: 15px; font-weight: bold; color: #333; margin: 0 0 8px 0; }
         .launch-status { display: inline-block; background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
         .updates-list { list-style: none; font-size: 13px; color: #666; margin-top: 10px; }
@@ -126,8 +135,6 @@
         .featured-payload { display: flex; align-items: center; gap: 16px; background: #f8f9fa; border-radius: 10px; padding: 16px; margin-top: 20px; border-left: 4px solid #ffc107; }
         .featured-payload img { width: 90px; height: 90px; object-fit: contain; flex-shrink: 0; border-radius: 6px; }
         .featured-payload-text { flex: 1; }
-        .featured-payload-label { font-size: 11px; font-weight: bold; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .featured-payload-name { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 4px; }
         .featured-payload-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 8px; }
         .featured-payload-link { display: inline-block; background: #667eea; color: white; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; transition: background 0.3s; }
         .featured-payload-link:hover { background: #764ba2; }
@@ -229,7 +236,7 @@
             </div>
             <div class="payload-section">
                 <div class="payload-subtitle">Hardware and Supplies</div>
-                <div class="payload-subtitle" style="margin-top:12px;">SpaceX Dragon spacecraft</div>
+                <div class="section-title" style="margin-top:12px;">SpaceX Dragon spacecraft</div>
                 <p>Cargo supports ISS operations with a European exercise device power cable, catalytic reactor for wastewater processing, two universal pretreat tanks (plus adapter) for waste systems, ARMADILLO cartridges for water recovery, nitrogen tank, Ultraprobe, remote sensor unit, and hull repair patches. These spares ensure redundancy in life support and maintenance, critical for continuous habitation. NASA astronaut Jack Hathaway and ESA's Sophie Adenot will oversee docking.</p>
             </div>
         </div>
