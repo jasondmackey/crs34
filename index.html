@@ -312,7 +312,7 @@
                     <span id="iss-timestamp">Updated: --</span>
                 </div>
                 <div style="font-size:11px;color:#666;margin-top:8px;text-align:center">
-                    Data: <a href="http://open-notify.org/Open-Notify-API/ISS-Location-Now/" target="_blank" style="color:#667eea">Open Notify API</a>
+                    Data: <a href="https://api.wheretheiss.at/" target="_blank" style="color:#667eea">whereisthiss.at API</a>
                 </div>
             </div>
         </div>
@@ -688,7 +688,7 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // --- ISS Tracker via Open Notify API with Leaflet map ---
+    // --- ISS Tracker via whereotheiss.at API with Leaflet map ---
     let issMap, issMarker;
     
     // Initialize map
@@ -704,23 +704,20 @@
     
     async function updateISSTracker() {
         try {
-            const response = await fetch('https://api.codetabs.com/v1/proxy/?quest=http://api.open-notify.org/iss-now.json');
+            const response = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
             const data = await response.json();
-            if (data.message === 'success') {
-                const pos = data.iss_position;
-                const lat = parseFloat(pos.latitude);
-                const lon = parseFloat(pos.longitude);
-                
-                // Update text display
-                document.getElementById('iss-lat').textContent = pos.latitude;
-                document.getElementById('iss-lon').textContent = pos.longitude;
-                document.getElementById('iss-timestamp').textContent = 'Updated: ' + new Date(data.timestamp * 1000).toLocaleString();
-                
-                // Update map marker
-                if (issMap && issMarker) {
-                    issMarker.setLatLng([lat, lon]);
-                    issMap.setView([lat, lon], 2);
-                }
+            const lat = parseFloat(data.latitude);
+            const lon = parseFloat(data.longitude);
+            
+            // Update text display
+            document.getElementById('iss-lat').textContent = data.latitude.toFixed(4);
+            document.getElementById('iss-lon').textContent = data.longitude.toFixed(4);
+            document.getElementById('iss-timestamp').textContent = 'Updated: ' + new Date(data.timestamp * 1000).toLocaleString();
+            
+            // Update map marker
+            if (issMap && issMarker) {
+                issMarker.setLatLng([lat, lon]);
+                issMap.setView([lat, lon], 2);
             }
         } catch (e) {
             console.error('ISS API error:', e);
