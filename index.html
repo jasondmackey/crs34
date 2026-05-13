@@ -139,6 +139,11 @@
         .iss-position { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
         .iss-label { color: #764ba2; font-weight: bold; }
         .iss-meta { font-size: 12px; color: #666; text-align: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+        /* Payload styles */
+        .payload-section { margin-bottom: 15px; line-height: 1.7; }
+        .payload-subtitle { font-weight: bold; color: #764ba2; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .featured-payload-desc p { margin: 8px 0 0 0; font-size: 14px; line-height: 1.6; }
+        .featured-payload-desc p:first-child { margin-top: 0; }
     </style>
 </head>
 <body>
@@ -198,13 +203,15 @@
         </div>
         <div class="status-section" id="payload">
             <div class="status-title">Payload Highlights</div>
-            <ul class="updates-list">
-                >~6,500 lbs cargo and crew supplies</li>
-                >6th flight for this Dragon capsule (record)</li>
-                >Bone scaffold experiment — osteoporosis research</li>
-                >Charged particle instrument — space weather</li>
-                >Planet formation investigation</li>
-            </ul>
+            <div class="payload-section">
+                <div class="payload-subtitle">Key Science Payloads</div>
+                <p>CRS-34 emphasizes microgravity research with experiments like <strong>ODYSSEY</strong>, which tests Earth-based simulators against real space conditions by observing bacterial behavior. <strong>Green Bone</strong> grows bone cells on a rattan wood scaffold to study osteoporosis treatments in microgravity, while <strong>SPARK</strong> analyzes red blood cell and spleen changes for long-duration mission health safeguards. Additional payloads include <strong>STORIE</strong> for monitoring space weather-impacted charged particles (protecting grids/satellites), <strong>Laplace</strong> for dust particle dynamics in planet formation, and <strong>CLARREO Pathfinder</strong> for Earth/Moon sunlight reflection measurements.</p>
+            </div>
+            <div class="payload-section">
+                <div class="payload-subtitle">Hardware and Supplies</div>
+                <p><strong>SpaceX Dragon spacecraft</strong></p>
+                <p>Cargo supports ISS operations with a European exercise device power cable, catalytic reactor for wastewater processing, two universal pretreat tanks (plus adapter) for waste systems, ARMADILLO cartridges for water recovery, nitrogen tank, Ultraprobe, remote sensor unit, and hull repair patches. These spares ensure redundancy in life support and maintenance, critical for continuous habitation. NASA astronaut Jack Hathaway and ESA's Sophie Adenot will oversee docking.</p>
+            </div>
         </div>
         <div class="featured-payload">
             <a href="https://science.nasa.gov/mission/clarreo-pathfinder/" target="_blank">
@@ -213,7 +220,10 @@
             <div class="featured-payload-text">
                 <div class="featured-payload-label">Featured Payload</div>
                 <div class="featured-payload-name">CLARREO Pathfinder</div>
-                <div class="featured-payload-desc">ISS-based instrument calibrating Earth observation satellites using the Sun and Moon as references — advancing climate measurement accuracy.</div>
+                <div class="featured-payload-desc">
+                    <p><strong>CLARREO Pathfinder</strong> (Calibration Absolute Radiance and Refractivity Observatory Pathfinder) demonstrates an ability to take highly accurate measurements of sunlight reflected by Earth and the Moon. These measurements, which are anchored to international standards, will be five to ten times more accurate than those from existing sensors.</p>
+                    <p>CLARREO Pathfinder is designed to have the unique ability to maintain its high accuracy throughout its lifetime — showcasing technology that can be of use to all providers of Earth observations. Higher accuracy means greater certainty in measurements, enabling CLARREO Pathfinder to provide a calibration standard that could improve government and commercial fleets.</p>
+                </div>
                 <a href="https://science.nasa.gov/mission/clarreo-pathfinder/" target="_blank" class="featured-payload-link">NASA Mission Page →</a>
             </div>
         </div>
@@ -343,6 +353,8 @@
     </div>
 </div>
 
+<!-- Leaflet JS for ISS Tracker map -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lNsD+Q=" crossorigin=""></script>
 <script>
     // Initialize feed buttons - scroll to the selected feed
     document.querySelectorAll('.feed-btn').forEach(btn => {
@@ -727,7 +739,5 @@
         setInterval(updateISSTracker, 5000);
     });
 </script>
-<!-- Leaflet JS for ISS Tracker map -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lNsD+Q=" crossorigin=""></script>
 </body>
 </html>
