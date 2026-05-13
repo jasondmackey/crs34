@@ -131,6 +131,11 @@
             .stream-embed { padding-bottom: 56.25%; margin-bottom: 12px; }
             .chat-messages { height: 200px; }
         }
+        /* ISS Tracker styles */
+        .iss-tracker { background: #f8f9fa; border-radius: 10px; padding: 15px; }
+        .iss-position { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
+        .iss-label { color: #764ba2; font-weight: bold; }
+        .iss-meta { font-size: 12px; color: #666; text-align: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
     </style>
 </head>
 <body>
@@ -279,8 +284,21 @@
 
         <div class="panel">
             <div class="panel-header">🛰️ ISS Tracker</div>
-            <div class="stream-embed iss-tracker">
-                <iframe src="https://spotthestation.nasa.gov/" allowfullscreen></iframe>
+            <div class="iss-tracker">
+                <div class="iss-position">
+                    <span class="iss-label">Latitude:</span>
+                    <span id="iss-lat">Loading...</span>
+                </div>
+                <div class="iss-position">
+                    <span class="iss-label">Longitude:</span>
+                    <span id="iss-lon">Loading...</span>
+                </div>
+                <div class="iss-meta">
+                    <span id="iss-timestamp">Updated: --</span>
+                </div>
+                <div style="font-size:11px;color:#666;margin-top:8px;text-align:center">
+                    Data: <a href="http://open-notify.org/Open-Notify-API/ISS-Location-Now/" target="_blank" style="color:#667eea">Open Notify API</a>
+                </div>
             </div>
         </div>
 
@@ -655,6 +673,27 @@
 
     updateCountdown();
     setInterval(updateCountdown, 1000);
+
+    // --- ISS Tracker via Open Notify API ---
+    async function updateISSTracker() {
+        try {
+            const response = await fetch('http://api.open-notify.org/iss-now.json');
+            const data = await response.json();
+            if (data.message === 'success') {
+                const pos = data.iss_position;
+                document.getElementById('iss-lat').textContent = pos.latitude;
+                document.getElementById('iss-lon').textContent = pos.longitude;
+                document.getElementById('iss-timestamp').textContent = 'Updated: ' + new Date(data.timestamp * 1000).toLocaleString();
+            }
+        } catch (e) {
+            console.error('ISS API error:', e);
+            document.getElementById('iss-lat').textContent = 'N/A';
+            document.getElementById('iss-lon').textContent = 'N/A';
+            document.getElementById('iss-timestamp').textContent = 'Unable to load';
+        }
+    }
+    updateISSTracker();
+    setInterval(updateISSTracker, 5000);
 </script>
 </body>
 </html>
