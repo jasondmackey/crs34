@@ -7,7 +7,7 @@
     <!-- Leaflet for ISS Tracker map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script src="https://cdn.jsdelivr.net/gh/joergdietrich/Leaflet.Terminator@1.0/L.Terminator.min.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
@@ -836,17 +836,65 @@
             dashArray: '6, 6'
         }).addTo(issMap);
 
-        // Day/night terminator overlay (wrapped in try/catch so failure doesn't break tracker)
-        try {
-            issTerminator = L.terminator({
+        // Day/night terminator overlay (inlined - no external dependency)
+        (function() {
+            function julian(date) {
+                return date / 86400000 - date.getTimezoneOffset() / 1440 + 2440587.5;
+            }
+            function GMST(julianDay) {
+                var d = julianDay - 2451545.0;
+                return (18.697374558 + 24.06570982441908 * d) % 24;
+            }
+            function sunEclipticPosition(julianDay) {
+                var d = julianDay - 2451545.0;
+                var g = (357.529 + 0.98560028 * d) * Math.PI / 180;
+                var q = 280.459 + 0.98564736 * d;
+                var L = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * Math.PI / 180;
+                var e = (23.439 - 0.0000004 * d) * Math.PI / 180;
+                return { lambda: L, epsilon: e };
+            }
+            function sunEquatorialPosition(sunEclPos) {
+                var ra = Math.atan2(Math.cos(sunEclPos.epsilon) * Math.sin(sunEclPos.lambda), Math.cos(sunEclPos.lambda));
+                var dec = Math.asin(Math.sin(sunEclPos.epsilon) * Math.sin(sunEclPos.lambda));
+                return { ra: ra, dec: dec };
+            }
+            function getTerminatorPoints(date) {
+                var now = date || new Date();
+                var jd = julian(now);
+                var gst = GMST(jd);
+                var sunPos = sunEquatorialPosition(sunEclipticPosition(jd));
+                var dec = sunPos.dec;
+                var ra = sunPos.ra;
+                var points = [];
+                for (var lon = -180; lon <= 180; lon += 2) {
+                    var ha = (gst - ra * 12 / Math.PI + lon / 15) * Math.PI / 12;
+                    var lat = Math.atan(-Math.cos(ha) / Math.tan(dec)) * 180 / Math.PI;
+                    points.push([lat, lon]);
+                }
+                // Sort and build polygon covering night side
+                var north = dec > 0;
+                points.sort(function(a, b) { return a[1] - b[1]; });
+                var poly = points.slice();
+                if (north) {
+                    poly.push([90, 180]); poly.push([90, -180]);
+                } else {
+                    poly.push([-90, 180]); poly.push([-90, -180]);
+                }
+                return poly;
+            }
+            var termPoly = L.polygon(getTerminatorPoints(new Date()), {
+                color: '#2244aa',
                 fillColor: '#000033',
-                fillOpacity: 0.35,
-                color: '#334',
-                weight: 1
+                fillOpacity: 0.28,
+                weight: 1,
+                opacity: 0.5
             }).addTo(issMap);
-        } catch(e) {
-            console.warn('Leaflet.Terminator not available:', e);
-        }
+            issTerminator = {
+                setTime: function(date) {
+                    termPoly.setLatLngs(getTerminatorPoints(date));
+                }
+            };
+        })();
     }
 
     async function updateISSTracker() {
