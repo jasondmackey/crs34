@@ -159,7 +159,7 @@
         /* ISS Tracker styles */
         .iss-tracker { background: #f8f9fa; border-radius: 10px; padding: 15px; }
         .iss-map { height: 300px; width: 100%; border-radius: 8px 8px 0 0; margin-bottom: 0; }
-        .iss-status-bar { display: grid; grid-template-columns: repeat(3,1fr); background: #1e1e2e; border-radius: 0 0 8px 8px; padding: 10px 14px; margin-bottom: 10px; gap: 8px 4px; }
+        .iss-status-bar { display: grid; grid-template-columns: repeat(3,1fr); background: #2d3050; border-radius: 0 0 8px 8px; padding: 10px 14px; margin-bottom: 10px; gap: 8px 4px; }
         .iss-stat { text-align: center; padding: 4px 0; }
         .iss-stat-label { font-size: 10px; color: #9aa0b4; text-transform: uppercase; letter-spacing: 1.2px; display: block; margin-bottom: 3px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .iss-stat-value { font-size: 14px; color: #e8eaf0; font-weight: bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -222,7 +222,7 @@
                 ><span class="update-time">9:50 AM EDT</span> — ISS docking at Harmony (May 14)</li>
             </ul>
             <div class="weather-card" style="margin-top:10px;">
-                <div style="font-weight:bold;margin-bottom:4px;">⛅ Live Weather — KSC Launch Site <span class="wx-live-badge">LIVE</span></div>
+                <div style="font-weight:bold;margin-bottom:4px;">⛅ Live Weather — KSC Launch Site <span class="wx-live-badge">LIVE</span> <span id="wx-go-nogo" style="font-size:11px;padding:2px 8px;border-radius:10px;font-weight:bold;background:#ccc;color:#333;vertical-align:middle;">...</span></div>
                 <div class="go-prob" id="wx-condition">Loading...</div>
                 🌡 Temp: <span id="wx-temp">--</span> &nbsp;|&nbsp; 💨 Wind: <span id="wx-wind">--</span><br>
                 ☁️ Clouds: <span id="wx-clouds">--</span> &nbsp;|&nbsp; 🌧 Precip: <span id="wx-precip">--</span><br>
@@ -241,6 +241,7 @@
                 <p>Cargo supports ISS operations with a European exercise device power cable, catalytic reactor for wastewater processing, two universal pretreat tanks (plus adapter) for waste systems, ARMADILLO cartridges for water recovery, nitrogen tank, Ultraprobe, remote sensor unit, and hull repair patches. These spares ensure redundancy in life support and maintenance, critical for continuous habitation. NASA astronaut Jack Hathaway and ESA's Sophie Adenot will oversee docking.</p>
             </div>
         </div>
+        <div class="status-section">
         <div class="payload-section">
             <div class="payload-subtitle">Featured Payload</div>
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
@@ -250,8 +251,9 @@
                 <div class="payload-subtitle" style="margin:0;">CLARREO Pathfinder</div>
             </div>
             <p><strong>CLARREO Pathfinder</strong> (Calibration Absolute Radiance and Refractivity Observatory Pathfinder) demonstrates an ability to take highly accurate measurements of sunlight reflected by Earth and the Moon. These measurements, which are anchored to international standards, will be five to ten times more accurate than those from existing sensors.</p>
-            <p>CLARREO Pathfinder is designed to have the unique ability to maintain its high accuracy throughout its lifetime — showcasing technology that can be of use to all providers of Earth observations. Higher accuracy means greater certainty in measurements, enabling CLARREO Pathfinder to provide a calibration standard that could improve government and commercial fleets.</p>
+            <p style="margin-top:10px;">CLARREO Pathfinder is designed to have the unique ability to maintain its high accuracy throughout its lifetime — showcasing technology that can be of use to all providers of Earth observations. Higher accuracy means greater certainty in measurements, enabling CLARREO Pathfinder to provide a calibration standard that could improve government and commercial fleets.</p>
             <a href="https://science.nasa.gov/mission/clarreo-pathfinder/" target="_blank" class="resource-link" style="margin-top:4px;">NASA Mission Page →</a>
+        </div>
         </div>
 
         <div class="status-section" id="resources">
@@ -621,6 +623,61 @@
     // Load messages on startup
     loadChatMessages();
 
+        // CRS34Bot: automated mission status messages
+        const BOT_KEY = 'crs34botmessages';
+        const BOT_NAME = '@CRS34Bot';
+
+        function postBotMessage(text) {
+            const dedupKey = BOT_KEY + ':' + text.substring(0, 40);
+            if (localStorage.getItem(dedupKey)) return;
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const msgId = 'bot-' + Date.now();
+            const msgHtml = '<div class="chat-message" data-id="' + msgId + '" style="background:#e8f4e8;border-left:3px solid #28a745;">'
+                + '<span class="time">' + timestamp + '</span> '
+                + '<span class="user" style="color:#28a745;">' + BOT_NAME + '</span> '
+                + escapeHtml(text)
+                + '</div>';
+            document.getElementById('chatMessages').insertAdjacentHTML('beforeend', msgHtml);
+            document.getElementById('chatMessages').scrollTop = 99999;
+            localStorage.setItem(dedupKey, '1');
+            saveAllMessages();
+        }
+
+        function runBotUpdates() {
+            const launchDate = new Date('2026-05-13T22:50:00Z').getTime();
+            const now = Date.now();
+            const diff = launchDate - now;
+            const hours = diff / 3600000;
+            const mins = diff / 60000;
+
+            if (document.getElementById('chatMessages').children.length === 0) {
+                postBotMessage('Welcome to CRS-34 Launch Chat! SpaceX Dragon lifts off today at 6:50 PM EDT from LC-39A. Enter @yourname to join.');
+            }
+            if (mins <= 1440 && mins > 480)
+                postBotMessage('Mission briefing: T-' + Math.round(hours) + 'h. Cargo: CLARREO Pathfinder, ODYSSEY, Green Bone, SPARK and ISS hardware.');
+            if (mins <= 480 && mins > 240)
+                postBotMessage('Launch day ops underway at LC-39A. Window opens 6:50 PM EDT. Weather: ' + (document.getElementById('wx-condition')?.textContent || '...'));
+            if (mins <= 240 && mins > 60)
+                postBotMessage('T-4 hours: Dragon propellant loading begins. Launch director poll expected soon. Watch feeds above.');
+            if (mins <= 60 && mins > 30)
+                postBotMessage('T-60 min: Live streams active. NASA coverage underway. Go/no-go poll in progress.');
+            if (mins <= 30 && mins > 10)
+                postBotMessage('T-30 min: Dragon is GO. Falcon 9 propellant load complete. Range is GO.');
+            if (mins <= 10 && mins > 2)
+                postBotMessage('T-10 min: Terminal countdown. Strongback retracting. Launch Director GO poll underway.');
+            if (mins <= 2 && mins > 0)
+                postBotMessage('T-2 min: Engine chill in progress. All systems nominal. LAUNCH IMMINENT.');
+            if (mins <= 0 && mins > -5)
+                postBotMessage('LIFTOFF! CRS-34 has launched! Falcon 9 carrying Dragon is on its way to the ISS!');
+            if (mins <= -5 && mins > -10)
+                postBotMessage('MECO confirmed. Stage separation. Second stage burn in progress. Booster landing burn initiated.');
+            if (mins <= -10 && mins > -15)
+                postBotMessage('Dragon is in orbit! Booster has landed. ISS rendezvous in approximately 29 hours.');
+        }
+
+        runBotUpdates();
+        setInterval(runBotUpdates, 60000);
+
     // Generate QR code for current page
     const qrCode = document.getElementById('qrCode');
     if (qrCode) {
@@ -658,7 +715,17 @@
             document.getElementById('hours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
             document.getElementById('minutes').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
             document.getElementById('seconds').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
-            document.getElementById('missionStatus').textContent = 'T-MINUS COUNTDOWN';
+            const missionEl = document.getElementById('missionStatus');
+        const hoursLeft = Math.floor(diff / 3600000);
+        if (hoursLeft <= 6 && diff > 0) {
+            missionEl.textContent = 'LAUNCH TODAY — T-' + document.getElementById('hours').textContent + 'h ' + document.getElementById('minutes').textContent + 'm';
+            missionEl.style.background = '#dc3545';
+            missionEl.style.color = 'white';
+            missionEl.style.animation = 'pulse 1s infinite';
+        } else {
+            missionEl.textContent = 'T-MINUS COUNTDOWN';
+            missionEl.style.background = '';
+        }
         } else {
             document.getElementById('days').textContent = '00';
             document.getElementById('hours').textContent = '00';
