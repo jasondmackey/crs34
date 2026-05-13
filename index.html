@@ -137,12 +137,12 @@
         /* ISS Tracker styles */
         .iss-tracker { background: #f8f9fa; border-radius: 10px; padding: 15px; }
         .iss-map { height: 300px; width: 100%; border-radius: 8px 8px 0 0; margin-bottom: 0; }
-        .iss-status-bar { display: grid; grid-template-columns: repeat(3,1fr); background: #0a0a1a; border-radius: 0 0 8px 8px; padding: 8px 12px; margin-bottom: 10px; gap: 6px; }
-        .iss-stat { text-align: center; }
-        .iss-stat-label { font-size: 9px; color: #667eea; text-transform: uppercase; letter-spacing: 1px; display: block; }
-        .iss-stat-value { font-size: 13px; color: #fff; font-weight: bold; }
+        .iss-status-bar { display: grid; grid-template-columns: repeat(3,1fr); background: #1e1e2e; border-radius: 0 0 8px 8px; padding: 10px 14px; margin-bottom: 10px; gap: 8px 4px; }
+        .iss-stat { text-align: center; padding: 4px 0; }
+        .iss-stat-label { font-size: 10px; color: #9aa0b4; text-transform: uppercase; letter-spacing: 1.2px; display: block; margin-bottom: 3px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .iss-stat-value { font-size: 14px; color: #e8eaf0; font-weight: bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .iss-day { color: #ffd700; }
-        .iss-eclipse { color: #aaaaff; }
+        .iss-eclipse { color: #a0a8ff; }
         .iss-position { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
         .iss-label { color: #764ba2; font-weight: bold; }
         .iss-meta { font-size: 12px; color: #666; text-align: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
@@ -693,10 +693,9 @@
 
     function initISSMap() {
         issMap = L.map('iss-map', { zoomControl: true, attributionControl: true }).setView([0, 0], 2);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 18
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA',
+            maxZoom: 12
         }).addTo(issMap);
 
         const issIcon = L.divIcon({
