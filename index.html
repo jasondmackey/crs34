@@ -7,7 +7,7 @@
     <!-- Leaflet for ISS Tracker map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-terminator@0.1.0/L.Terminator.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-terminator@0.1.0/L.Terminator.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
@@ -761,13 +761,17 @@
             dashArray: '6, 6'
         }).addTo(issMap);
 
-        // Day/night terminator overlay
-        issTerminator = L.terminator({
-            fillColor: '#000033',
-            fillOpacity: 0.35,
-            color: '#334',
-            weight: 1
-        }).addTo(issMap);
+        // Day/night terminator overlay (wrapped in try/catch so failure doesn't break tracker)
+        try {
+            issTerminator = L.terminator({
+                fillColor: '#000033',
+                fillOpacity: 0.35,
+                color: '#334',
+                weight: 1
+            }).addTo(issMap);
+        } catch(e) {
+            console.warn('Leaflet.Terminator not available:', e);
+        }
     }
 
     async function updateISSTracker() {
@@ -796,9 +800,9 @@
                 issFootprint.setLatLng([lat, lon]);
                 issMap.setView([lat, lon], 2);
                 // Refresh terminator to current time
-                if (issTerminator) {
-                    issTerminator.setTime(new Date());
-                }
+                try {
+                    if (issTerminator) issTerminator.setTime(new Date());
+                } catch(e) {}
             }
         } catch (e) {
             console.error('ISS API error:', e);
