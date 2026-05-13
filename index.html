@@ -932,7 +932,99 @@
         }
     }
 
-    window.addEventListener('load', () => {
+    
+  // ─── SpaceX Feed Bot ───────────────────────────────────────────────────────
+  // Polls @SpaceX via a public RSS proxy (nitter), filters for CRS-34 keywords,
+  // and posts matching tweets into the launch chat as @SpaceXBot messages.
+  const SPACEX_FEED_KEY = 'crs34_spacex_feed_seen';
+  const CRS34_KEYWORDS = [
+    'crs', 'crs-34', 'crs34', 'dragon', 'falcon 9', 'falcon9',
+    'liftoff', 'launch', 'meco', 'stage sep', 'orbit', 'booster',
+    'go for launch', 'webcast', 'weather', 'scrub', 'hold'
+  ];
+  // Use nitter RSS → allorigins CORS proxy so no API key needed
+  const FEED_URL = 'https://api.allorigins.win/get?url=' +
+    encodeURIComponent('https://nitter.net/SpaceX/rss');
+
+  function seenIds() {
+    try { return JSON.parse(localStorage.getItem(SPACEX_FEED_KEY) || '[]'); }
+    catch(e) { return []; }
+  }
+  function markSeen(id) {
+    const ids = seenIds();
+    if (!ids.includes(id)) {
+      ids.push(id);
+      // Keep only last 50 to avoid bloat
+      if (ids.length > 50) ids.splice(0, ids.length - 50);
+      localStorage.setItem(SPACEX_FEED_KEY, JSON.stringify(ids));
+    }
+  }
+
+  function postSpaceXMessage(text, url, pubDate) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+    const time = new Date(pubDate).toLocaleTimeString('en-US',
+      { hour: '2-digit', minute: '2-digit' });
+    const msgId = 'sx-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
+    const linkHtml = url
+      ? ` <a href="${url}" target="_blank" style="color:#1da1f2;font-size:11px;">[view]</a>`
+      : '';
+    const msgHtml = `<div class="chat-message" data-id="${msgId}"
+      style="background:#e8f4fe;border-left:3px solid #1da1f2;">
+      <span class="time">[${time}]</span>
+      <span class="user" style="color:#1da1f2;">@SpaceX</span>
+      ${escapeHtml(text)}${linkHtml}
+    </div>`;
+    chatMessages.insertAdjacentHTML('beforeend', msgHtml);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Persist into localStorage so it survives refresh
+    try {
+      const stored = localStorage.getItem('crs34_chat_messages') || '';
+      localStorage.setItem('crs34_chat_messages', stored + msgHtml);
+    } catch(e) {}
+  }
+
+  function matchesCRS34(text) {
+    const lower = text.toLowerCase();
+    return CRS34_KEYWORDS.some(kw => lower.includes(kw));
+  }
+
+  function fetchSpaceXFeed() {
+    fetch(FEED_URL)
+      .then(r => r.json())
+      .then(data => {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data.contents, 'text/xml');
+        const items = Array.from(xml.querySelectorAll('item'));
+        const seen = seenIds();
+        // Process oldest-first so chat order is chronological
+        items.reverse().forEach(item => {
+          const guid = item.querySelector('guid')?.textContent || '';
+          const title = item.querySelector('title')?.textContent || '';
+          const link  = item.querySelector('link')?.textContent || '';
+          const pubDate = item.querySelector('pubDate')?.textContent || '';
+          if (seen.includes(guid)) return;
+          if (!matchesCRS34(title)) { markSeen(guid); return; }
+          markSeen(guid);
+          postSpaceXMessage(title, link, pubDate);
+        });
+      })
+      .catch(err => console.warn('SpaceX feed fetch failed:', err));
+  }
+
+  // Poll every 2 minutes during launch window, every 5 min otherwise
+  function startSpaceXFeedPolling() {
+    fetchSpaceXFeed();
+    const launchDate = new Date('2026-05-13T22:50:00Z').getTime();
+    const diff = launchDate - Date.now();
+    const interval = (diff > 0 && diff < 4 * 3600000) ? 120000 : 300000;
+    setInterval(fetchSpaceXFeed, interval);
+  }
+
+  startSpaceXFeedPolling();
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  window.addEventListener('load', () => {
         initISSMap();
         updateISSTracker();
         setInterval(updateISSTracker, 5000);
