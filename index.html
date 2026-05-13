@@ -7,7 +7,7 @@
     <!-- Leaflet for ISS Tracker map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-terminator@0.1.0/L.Terminator.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/joergdietrich/Leaflet.Terminator@1.0/L.Terminator.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
@@ -634,7 +634,9 @@
         const BOT_NAME = '@CRS34Bot';
 
         function postBotMessage(text) {
-            const dedupKey = BOT_KEY + ':' + text.substring(0, 40);
+            // Use milestone index as dedup key so weather text changes don't cause duplicates
+            const milestoneKeys = ['welcome','briefing','launchday','t4h','t60m','t30m','t10m','t2m','liftoff','meco','orbit'];
+            const dedupKey = BOT_KEY + ':' + milestoneKeys.find(k => text.toLowerCase().includes(k === 'welcome' ? 'welcome' : k === 'briefing' ? 'mission briefing' : k === 'launchday' ? 'launch day ops' : k === 't4h' ? 't-4 hours' : k === 't60m' ? 't-60' : k === 't30m' ? 't-30' : k === 't10m' ? 't-10' : k === 't2m' ? 't-2' : k === 'liftoff' ? 'liftoff' : k === 'meco' ? 'meco' : 'dragon is in orbit')) || text.substring(0, 20);
             if (localStorage.getItem(dedupKey)) return;
             const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             const msgId = 'bot-' + Date.now();
