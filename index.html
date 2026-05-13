@@ -390,8 +390,14 @@
             document.querySelectorAll('.feed-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const feed = btn.dataset.feed;
-            const targetId = feed === 'nasa' ? 'streamEmbed' : 'spacex-embed';
-            document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            document.querySelectorAll('.stream-embed').forEach(el => el.style.display = 'none');
+            if (feed === 'nasa') {
+                document.getElementById('streamEmbed').style.display = 'block';
+            } else if (feed === 'spacex') {
+                document.getElementById('spacex-embed').style.display = 'block';
+            } else {
+                document.querySelectorAll('.stream-embed').forEach(el => el.style.display = 'block');
+            }
         });
     });
 
