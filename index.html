@@ -674,10 +674,12 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // --- ISS Tracker via Open Notify API ---
+    // --- ISS Tracker via Open Notify API (using HTTPS proxy) ---
     async function updateISSTracker() {
         try {
-            const response = await fetch('http://api.open-notify.org/iss-now.json');
+            const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+            const apiUrl = 'http://api.open-notify.org/iss-now.json';
+            const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
             const data = await response.json();
             if (data.message === 'success') {
                 const pos = data.iss_position;
