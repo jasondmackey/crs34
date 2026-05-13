@@ -360,6 +360,60 @@
             </div>
         </div>
 
+
+        <!-- LASP MOC Clock Panel -->
+        <div class="panel" id="mocclock">
+            <div class="panel-header">🕐 LASP MOC Clock — CRS-34 / CPRS
+                <span style="background:#764ba2;color:white;font-size:9px;padding:2px 7px;border-radius:10px;margin-left:8px;font-weight:bold;vertical-align:middle;">LASP VPN ONLY</span>
+            </div>
+            <div style="font-size:11px;color:#888;margin-bottom:8px;text-align:center;">
+                🔒 Live feed requires LASP VPN connection —
+                <a href="https://mocclock2.lasp.colorado.edu/clock/cprs" target="_blank" style="color:#667eea;">open directly</a>
+            </div>
+            <!-- iframe attempts to load; onerror shows placeholder -->
+            <div style="position:relative;width:100%;border-radius:8px;overflow:hidden;background:#111;">
+                <iframe
+                    id="mocclockFrame"
+                    src="https://mocclock2.lasp.colorado.edu/clock/cprs"
+                    style="width:100%;height:220px;border:none;display:block;"
+                    onerror="document.getElementById('mocclockFallback').style.display='block';this.style.display='none';"
+                    onload="this.style.display='block';">
+                </iframe>
+                <div id="mocclockFallback" style="display:none;text-align:center;padding:10px;">
+                    <img src="mocclock-placeholder.png"
+                         alt="LASP MOC Clock — CRS-34 TDRS contact schedule"
+                         style="width:100%;border-radius:6px;opacity:0.85;">
+                    <div style="font-size:11px;color:#999;margin-top:6px;">
+                        📡 Live data unavailable — connect to LASP VPN to view real-time TDRS contact schedule
+                    </div>
+                </div>
+            </div>
+            <!-- Fallback detection: iframe to internal host will fail to load off-VPN -->
+            <script>
+                (function() {
+                    var frame = document.getElementById('mocclockFrame');
+                    var fallback = document.getElementById('mocclockFallback');
+                    // Show placeholder after 5s if iframe hasn't confirmed load
+                    var timer = setTimeout(function() {
+                        fallback.style.display = 'block';
+                        frame.style.display = 'none';
+                    }, 5000);
+                    frame.addEventListener('load', function() {
+                        // If loaded but empty (blocked), height will be 0 or cross-origin
+                        // Clear the timeout — it loaded something
+                        clearTimeout(timer);
+                        try {
+                            // Cross-origin access will throw — means VPN is working
+                            var doc = frame.contentDocument || frame.contentWindow.document;
+                            if (!doc || doc.body.innerHTML === '') throw new Error();
+                        } catch(e) {
+                            // Cross-origin = loaded fine on VPN (expected)
+                            clearTimeout(timer);
+                        }
+                    });
+                })();
+            </script>
+        </div>
         <div class="panel" id="updates">
             <div class="panel-header">⚡ Live Update Feeds</div>
 
