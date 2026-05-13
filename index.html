@@ -662,7 +662,7 @@
             if (mins <= 1440 && mins > 480)
                 postBotMessage('Mission briefing: T-' + Math.round(hours) + 'h. Cargo: CLARREO Pathfinder, ODYSSEY, Green Bone, SPARK and ISS hardware.');
             if (mins <= 480 && mins > 240)
-                postBotMessage('Launch day ops underway at LC-39A. Window opens 6:50 PM EDT. Weather: ' + (document.getElementById('wx-condition')?.textContent || '...'));
+                setTimeout(() => postBotMessage('Launch day ops underway at LC-39A. Window opens 6:50 PM EDT. Weather: ' + (document.getElementById('wx-condition')?.textContent || '...')), 4000);
             if (mins <= 240 && mins > 60)
                 postBotMessage('T-4 hours: Dragon propellant loading begins. Launch director poll expected soon. Watch feeds above.');
             if (mins <= 60 && mins > 30)
