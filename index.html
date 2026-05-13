@@ -7,6 +7,7 @@
     <!-- Leaflet for ISS Tracker map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-terminator@0.1.0/L.Terminator.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
@@ -716,7 +717,7 @@
     setInterval(updateCountdown, 1000);
 
     // --- ISS Tracker via wheretheiss.at API with Leaflet map ---
-    let issMap, issMarker, issFootprint;
+    let issMap, issMarker, issFootprint, issTerminator;
 
     function initISSMap() {
         issMap = L.map('iss-map', { zoomControl: true, attributionControl: true }).setView([0, 0], 2);
@@ -759,6 +760,14 @@
             weight: 1.5,
             dashArray: '6, 6'
         }).addTo(issMap);
+
+        // Day/night terminator overlay
+        issTerminator = L.terminator({
+            fillColor: '#000033',
+            fillOpacity: 0.35,
+            color: '#334',
+            weight: 1
+        }).addTo(issMap);
     }
 
     async function updateISSTracker() {
@@ -786,6 +795,10 @@
                 issMarker.setLatLng([lat, lon]);
                 issFootprint.setLatLng([lat, lon]);
                 issMap.setView([lat, lon], 2);
+                // Refresh terminator to current time
+                if (issTerminator) {
+                    issTerminator.setTime(new Date());
+                }
             }
         } catch (e) {
             console.error('ISS API error:', e);
