@@ -1182,10 +1182,10 @@
 
   function fetchSpaceXFeed() {
     fetch(FEED_URL)
-      .then(r => r.json())
+      .then(r => r.text())
       .then(data => {
         const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, 'text/xml');
+        const xml = parser.parseFromString(data, 'text/xml');
         const items = Array.from(xml.querySelectorAll('item'));
         const seen = seenIds();
         // Process oldest-first so chat order is chronological
