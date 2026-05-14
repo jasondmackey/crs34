@@ -1133,8 +1133,8 @@
     'liftoff', 'launch', 'meco', 'stage sep', 'orbit', 'booster',
     'go for launch', 'webcast', 'weather', 'scrub', 'hold'
   ];
-  // Use nitter RSS → allorigins CORS proxy so no API key needed
-  const FEED_URL = 'https://api.allorigins.win/get?url=' +
+  // Use nitter RSS → corsproxy.io CORS proxy (allorigins.win was down)
+  const FEED_URL = 'https://corsproxy.io/?' +
     encodeURIComponent('https://nitter.net/SpaceX/rss');
 
   function seenIds() {
