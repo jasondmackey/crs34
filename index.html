@@ -768,7 +768,7 @@
         }
 
         function runBotUpdates() {
-            const launchDate = new Date('2026-05-15T22:05:00Z').getTime();
+            const launchDate = window.CRS34_LAUNCH_OVERRIDE || new Date(localStorage.getItem('crs34_spacex_api_launch_time') || '2026-05-15T22:05:00Z').getTime();
             const now = Date.now();
             const diff = launchDate - now;
             const hours = diff / 3600000;
@@ -807,6 +807,76 @@
         runBotUpdates();
         setInterval(runBotUpdates, 60000);
 
+        // ── SpaceX API Launch Time Watcher ───────────────────────────────────
+        // Fetches CRS-34 launch data from SpaceX v4 API and auto-updates the
+        // countdown if the launch time changes (scrub/reschedule detection).
+        const SX_API_KEY = 'crs34_spacex_api_launch_time';
+        const SX_API_URL = 'https://api.spacexdata.com/v4/launches/upcoming';
+
+        function fmtUTC(iso) {
+            const d = new Date(iso);
+            return d.toLocaleString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+                timeZone: 'America/New_York'
+            });
+        }
+
+        function applyNewLaunchTime(isoTime) {
+            // Update the global launch date used by updateCountdown() and runBotUpdates()
+            // We do this by redefining the launchDate reference used in those functions
+            // via a global override variable checked at runtime
+            window.CRS34_LAUNCH_OVERRIDE = new Date(isoTime).getTime();
+            localStorage.setItem(SX_API_KEY, isoTime);
+        }
+
+        async function checkSpaceXAPILaunchTime() {
+            try {
+                const resp = await fetch(SX_API_URL);
+                const launches = await resp.json();
+                // Find CRS-34 by name
+                const crs34 = launches.find(l =>
+                    l.name && l.name.toUpperCase().includes('CRS-34')
+                );
+                if (!crs34 || !crs34.date_utc) return;
+
+                const apiTime = crs34.date_utc;
+                const storedTime = localStorage.getItem(SX_API_KEY);
+                const hardcoded = '2026-05-15T22:05:00.000Z';
+
+                // Check against both stored and hardcoded time
+                const referenceTime = storedTime || hardcoded;
+                const apiMs = new Date(apiTime).getTime();
+                const refMs  = new Date(referenceTime).getTime();
+
+                if (Math.abs(apiMs - refMs) > 60000) {
+                    // Launch time changed by more than 1 minute — notify and update
+                    const oldFmt = fmtUTC(referenceTime);
+                    const newFmt = fmtUTC(apiTime);
+                    applyNewLaunchTime(apiTime);
+
+                    // Post bot notification to chat
+                    postBotMessage(
+                        'LAUNCH TIME UPDATE detected via SpaceX API: ' +
+                        'T-0 changed from ' + oldFmt + ' → ' + newFmt +
+                        '. Countdown updated automatically.'
+                    );
+
+                    console.log('CRS-34 launch time updated:', oldFmt, '→', newFmt);
+                } else {
+                    // Time matches — store it for future reference
+                    applyNewLaunchTime(apiTime);
+                }
+            } catch(e) {
+                console.warn('SpaceX API check failed:', e);
+            }
+        }
+
+        // Check on load and every 15 minutes
+        checkSpaceXAPILaunchTime();
+        setInterval(checkSpaceXAPILaunchTime, 900000);
+        // ─────────────────────────────────────────────────────────────────────
+
     // Generate QR code for current page
     const qrCode = document.getElementById('qrCode');
     if (qrCode) {
@@ -835,7 +905,7 @@
     });
 
     function updateCountdown() {
-        const launchDate = new Date('2026-05-15T22:05:00Z').getTime();
+        const launchDate = window.CRS34_LAUNCH_OVERRIDE || new Date(localStorage.getItem('crs34_spacex_api_launch_time') || '2026-05-15T22:05:00Z').getTime();
         const now = new Date().getTime();
         const diff = launchDate - now;
 
@@ -1136,7 +1206,7 @@
   // Poll every 2 minutes during launch window, every 5 min otherwise
   function startSpaceXFeedPolling() {
     fetchSpaceXFeed();
-    const launchDate = new Date('2026-05-15T22:05:00Z').getTime();
+    const launchDate = window.CRS34_LAUNCH_OVERRIDE || new Date(localStorage.getItem('crs34_spacex_api_launch_time') || '2026-05-15T22:05:00Z').getTime();
     const diff = launchDate - Date.now();
     const interval = (diff > 0 && diff < 4 * 3600000) ? 120000 : 300000;
     setInterval(fetchSpaceXFeed, interval);
