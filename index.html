@@ -227,8 +227,8 @@
             <div class="status-title">Mission Status</div>
             <span class="launch-status" id="missionStatus">T-MINUS COUNTDOWN</span>
             <ul class="updates-list" style="margin-top:10px">
-                ><span class="update-time">6:05 PM EDT</span> — Launch window (May 15)</li>
-                ><span class="update-time">~9:35 AM EDT</span> — ISS docking at Harmony (May 16)</li>
+                ><span class="update-time">6:05 PM EDT · 4:05 PM MDT · 22:05 UTC</span> — Launch window (May 15)</li>
+                ><span class="update-time">~9:35 AM EDT · 7:35 AM MDT · 13:35 UTC</span> — ISS docking at Harmony (May 16)</li>
             </ul>
             <div class="weather-card" style="margin-top:10px;">
                 <div style="font-weight:bold;margin-bottom:4px;">⛅ Live Weather — KSC Launch Site <span class="wx-live-badge">LIVE</span> <span id="wx-go-nogo" style="font-size:11px;padding:2px 8px;border-radius:10px;font-weight:bold;background:#ccc;color:#333;vertical-align:middle;">...</span></div>
@@ -973,6 +973,32 @@
                 document.getElementById('wx-clouds').textContent = c.cloud_cover + '%';
                 document.getElementById('wx-precip').textContent = c.precipitation.toFixed(2) + ' in';
                 document.getElementById('wx-updated').textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+
+                // ── WX GO/NO-GO assessment (45 WS Eastern Range rules) ──────
+                const goNogo   = document.getElementById('wx-go-nogo');
+                const windSpd  = Math.round(c.wind_speed_10m);
+                const windGust = Math.round(c.wind_gusts_10m);
+                const clouds   = c.cloud_cover;
+                const precip   = c.precipitation;
+                const wCode    = c.weather_code;
+                const badWind   = windSpd > 20 || windGust > 30;
+                const badPrecip = precip > 0;
+                const badSky    = wCode >= 61;
+                const marginal  = clouds > 50 || windSpd > 15 || windGust > 20;
+                if (badWind || badPrecip || badSky) {
+                    goNogo.textContent = '⛔ WX NO-GO';
+                    goNogo.style.background = '#dc3545';
+                    goNogo.style.color = 'white';
+                } else if (marginal) {
+                    goNogo.textContent = '⚠️ WX MARGINAL';
+                    goNogo.style.background = '#ffc107';
+                    goNogo.style.color = '#333';
+                } else {
+                    goNogo.textContent = '✅ WX GO';
+                    goNogo.style.background = '#28a745';
+                    goNogo.style.color = 'white';
+                }
+                // ─────────────────────────────────────────────────────────────
             })
             .catch(() => { document.getElementById('wx-condition').textContent = 'Weather unavailable'; });
     }
