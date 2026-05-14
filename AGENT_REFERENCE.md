@@ -11,7 +11,7 @@
   1. Identify target lines using `grep -n` or `sed -n 'X,Yp'`.
   2. Use Python string slicing or exact line-by-line `sed` operations.
   3. Verify the final line count matches expectations before pushing.
-- **CDN Propagation**: GitHub Pages takes 1-3 minutes to update. Always wait and perform a "Hard Refresh" (Cmd+Shift+R) before evaluating changes.
+- **CDN Propagation**: GitHub Pages takes 1-3 minutes to update. Always waitUpdate AGENT_REFERENCE.md with formal project reference and lessons learned and perform a "Hard Refresh" (Cmd+Shift+R) before evaluating changes.
 
 ## Feature Implementation Lessons
 - **RSS Proxying**: Use `https://corsproxy.io/?` for reliable CORS-safe fetching of SpaceX RSS feeds. `allorigins.win` proved unstable during high-traffic windows.
