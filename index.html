@@ -743,6 +743,9 @@
     loadChatMessages();
 
         // CRS34Bot: automated mission status messages
+        // ── SCRUB FLAG: set to true to suppress all post-T-0 bot messages ──
+        const LAUNCH_SCRUBBED = false;  // SET TO true ON SCRUB/HOLD
+        // ────────────────────────────────────────────────────────────────────
         const BOT_KEY = 'crs34botmessages';
         const BOT_NAME = '@CRS34Bot';
 
@@ -777,7 +780,7 @@
             if (mins <= 1440 && mins > 480)
                 postBotMessage('Mission briefing: T-' + Math.round(hours) + 'h. Cargo: CLARREO Pathfinder, ODYSSEY, Green Bone, SPARK and ISS hardware.');
             if (mins <= 480 && mins > 240)
-                setTimeout(() => postBotMessage('Launch day ops underway at LC-39A. Window opens 6:50 PM EDT. Weather: ' + (document.getElementById('wx-condition')?.textContent || '...')), 4000);
+                setTimeout(() => postBotMessage('Launch day ops underway at LC-39A. Window opens 6:05 PM EDT. Weather: ' + (document.getElementById('wx-condition')?.textContent || '...')), 4000);
             if (mins <= 240 && mins > 60)
                 postBotMessage('T-4 hours: Dragon propellant loading begins. Launch director poll expected soon. Watch feeds above.');
             if (mins <= 60 && mins > 30)
@@ -788,12 +791,17 @@
                 postBotMessage('T-10 min: Terminal countdown. Strongback retracting. Launch Director GO poll underway.');
             if (mins <= 2 && mins > 0)
                 postBotMessage('T-2 min: Engine chill in progress. All systems nominal. LAUNCH IMMINENT.');
-            if (mins <= 0 && mins > -5)
-                postBotMessage('LIFTOFF! CRS-34 has launched! Falcon 9 carrying Dragon is on its way to the ISS!');
-            if (mins <= -5 && mins > -10)
-                postBotMessage('MECO confirmed. Stage separation. Second stage burn in progress. Booster landing burn initiated.');
-            if (mins <= -10 && mins > -15)
-                postBotMessage('Dragon is in orbit! Booster has landed. ISS rendezvous in approximately 29 hours.');
+            if (!LAUNCH_SCRUBBED) {
+                if (mins <= 0 && mins > -5)
+                    postBotMessage('LIFTOFF! CRS-34 has launched! Falcon 9 carrying Dragon is on its way to the ISS!');
+                if (mins <= -5 && mins > -10)
+                    postBotMessage('MECO confirmed. Stage separation. Second stage burn in progress. Booster landing burn initiated.');
+                if (mins <= -10 && mins > -15)
+                    postBotMessage('Dragon is in orbit! Booster has landed. ISS rendezvous in approximately 29 hours.');
+            } else {
+                if (mins <= 0 && mins > -60)
+                    postBotMessage('SCRUB. Launch attempt aborted. Awaiting next launch window announcement.');
+            }
         }
 
         runBotUpdates();
