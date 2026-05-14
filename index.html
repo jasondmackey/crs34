@@ -885,6 +885,37 @@
         // Check on load and every 15 minutes
         checkSpaceXAPILaunchTime();
         setInterval(checkSpaceXAPILaunchTime, 900000);
+
+        // ── Launch Library 2 — Launch Probability ───────────────────────────
+        async function fetchLL2Probability() {
+            try {
+                const resp = await fetch(
+                    'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?search=CRS-34&limit=1&format=json'
+                );
+                const data = await resp.json();
+                const el = document.getElementById('ll2-probability');
+                if (!el) return;
+                if (data.results && data.results.length > 0) {
+                    const launch = data.results[0];
+                    const prob = launch.probability;
+                    if (prob !== null && prob !== undefined) {
+                        el.textContent = prob + '%';
+                        el.style.color = prob >= 80 ? '#28a745' : prob >= 50 ? '#ffc107' : '#dc3545';
+                    } else {
+                        el.textContent = 'N/A';
+                        el.style.color = '#aaa';
+                    }
+                } else {
+                    el.textContent = 'N/A';
+                    el.style.color = '#aaa';
+                }
+            } catch(e) {
+                console.warn('LL2 probability fetch failed:', e);
+            }
+        }
+        fetchLL2Probability();
+        setInterval(fetchLL2Probability, 1800000); // every 30 min
+        // ─────────────────────────────────────────────────────────────────────
         // ─────────────────────────────────────────────────────────────────────
 
     // Generate QR code for current page
