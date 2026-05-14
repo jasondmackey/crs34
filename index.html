@@ -207,7 +207,7 @@
                 <div style="flex:1">
                     <h1 style="font-size:28px">SpaceX CRS-34</h1>
                     <div class="mission-info" style="margin:6px 0">ISS Cargo Resupply Mission — Falcon 9</div>
-                    <div class="launch-time">May 13, 2026 · 6:50 PM EDT</div>
+                    <div class="launch-time">May 15, 2026 · 6:05 PM EDT</div>
                 </div>
                 <div style="text-align:center">
                     <a href="https://science.nasa.gov/mission/clarreo-pathfinder/" target="_blank">
@@ -473,6 +473,30 @@
     </div>
 </div>
 <script>
+
+    // ── Scrub reset: clear false May 13 bot messages for all visitors ────────
+    (function() {
+        if (localStorage.getItem('crs34_scrub_reset_may13')) return;
+        const div = document.createElement('div');
+        div.innerHTML = localStorage.getItem('crs34_chat_messages') || '';
+        div.querySelectorAll('.chat-message').forEach(function(msg) {
+            var t = msg.textContent;
+            if (t.includes('LIFTOFF') || t.includes('MECO') ||
+                t.includes('Dragon is in orbit') || t.includes('Booster has landed') ||
+                t.includes('T-2 min') || t.includes('T-10 min') ||
+                t.includes('T-30 min') || t.includes('T-60') ||
+                t.includes('T-4 hours') || t.includes('Launch day ops')) {
+                msg.remove();
+            }
+        });
+        localStorage.setItem('crs34_chat_messages', div.innerHTML);
+        Object.keys(localStorage).filter(function(k){ return k.startsWith('crs34botmessages:'); })
+              .forEach(function(k){ localStorage.removeItem(k); });
+        localStorage.removeItem('crs34_spacex_feed_seen');
+        localStorage.setItem('crs34_scrub_reset_may13', '1');
+    })();
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Initialize feed buttons - scroll to the selected feed
     document.querySelectorAll('.feed-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -741,7 +765,7 @@
         }
 
         function runBotUpdates() {
-            const launchDate = new Date('2026-05-13T22:50:00Z').getTime();
+            const launchDate = new Date('2026-05-15T22:05:00Z').getTime();
             const now = Date.now();
             const diff = launchDate - now;
             const hours = diff / 3600000;
@@ -803,7 +827,7 @@
     });
 
     function updateCountdown() {
-        const launchDate = new Date('2026-05-13T22:50:00Z').getTime();
+        const launchDate = new Date('2026-05-15T22:05:00Z').getTime();
         const now = new Date().getTime();
         const diff = launchDate - now;
 
@@ -1104,7 +1128,7 @@
   // Poll every 2 minutes during launch window, every 5 min otherwise
   function startSpaceXFeedPolling() {
     fetchSpaceXFeed();
-    const launchDate = new Date('2026-05-13T22:50:00Z').getTime();
+    const launchDate = new Date('2026-05-15T22:05:00Z').getTime();
     const diff = launchDate - Date.now();
     const interval = (diff > 0 && diff < 4 * 3600000) ? 120000 : 300000;
     setInterval(fetchSpaceXFeed, interval);
